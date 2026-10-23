@@ -1,0 +1,24 @@
+cuju
+Copyright 2026 The cuju Authors (the contributors in the git history).
+Files without a license header are licensed under the Apache License 2.0, except the images in
+docs/assets, the logo and the match clip, which are licensed under Creative Commons Attribution
+4.0 International (CC BY 4.0). That license grants no right to use the name or the logo of cuju to
+suggest endorsement.
+
+cuju reimplements Google Research Football (https://github.com/google-research/football),
+Copyright 2019 Google LLC, Apache License 2.0. Its engine descends from Gameplay Football by
+Bastiaan Konings Schuiling, dedicated to the public domain. Files that carry a Google line were
+rewritten from that code by the cuju Authors in 2026. animations.bin and the asset bundles are
+derived from the data and scenarios of Google Research Football.
+cuju is not affiliated with or endorsed by Google.
+
+include/cuju/libm ports math functions of the GNU C Library 2.39 (LGPL 2.1 or later). Where Arm
+Optimized Routines v21.02 (MIT, Copyright Arm Limited) or FreeBSD's msun (the notice of Sun
+Microsystems, Inc.) holds the same code, the port is taken from there under that license. Each file
+reproduces its upstream notices and names its license. The libraries of cuju compile these
+functions in, and the complete source of each release is published with it.
+
+The world RNG follows Boost.Random (Boost Software License 1.0). The episode seeds follow MT19937
+by Makoto Matsumoto and Takuji Nishimura (BSD-3-Clause), as CPython's random module uses it.
+
+License texts: LICENSE and LICENSES/.
