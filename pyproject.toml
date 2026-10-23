@@ -1,0 +1,94 @@
+[build-system]
+requires = ["scikit-build-core>=0.12"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "cuju"
+# The version is `__version__` in `python/cuju/_version.py`.
+dynamic = ["version"]
+description = "A bit-exact, batched reimplementation of Google Research Football, for CUDA and CPU"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0 AND LGPL-2.1-or-later AND MIT AND SunPro AND BSL-1.0 AND BSD-3-Clause"
+license-files = ["LICENSE", "NOTICE", "LICENSES/*"]
+authors = [{ name = "André Koraleski" }]
+keywords = [
+    "gfootball",
+    "google-research-football",
+    "football",
+    "reinforcement-learning",
+    "multi-agent",
+    "cuda",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: GPU :: NVIDIA CUDA :: 12",
+    "Intended Audience :: Science/Research",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Games/Entertainment :: Simulation",
+]
+# PyTorch's last x86-64 macOS wheel is 2.2.2, built against numpy 1. PyTorch reads the GPU
+# outputs, which it takes through `__cuda_array_interface__`, with numpy.
+dependencies = [
+    "torch>=2.3; sys_platform != 'darwin' or platform_machine != 'x86_64'",
+    "torch>=2.2; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+    "numpy; sys_platform != 'darwin' or platform_machine != 'x86_64'",
+    "numpy<2; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+]
+
+[project.urls]
+Homepage = "https://github.com/AndreKoraleski/cuju"
+Documentation = "https://github.com/AndreKoraleski/cuju/tree/main/docs"
+Issues = "https://github.com/AndreKoraleski/cuju/issues"
+Changelog = "https://github.com/AndreKoraleski/cuju/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+spaces = ["gymnasium>=0.29"]
+test = ["pytest>=8"]
+
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+cmake.version = ">=3.24"
+cmake.build-type = "Release"
+wheel.packages = ["python/cuju"]
+# The libraries load through ctypes and link neither Python nor torch, so one wheel serves every
+# Python 3.
+wheel.py-api = "py3"
+build-dir = "build/{wheel_tag}"
+# The images of the docs are CC BY 4.0 and not source, so the sdist leaves them out.
+sdist.exclude = ["docs/assets"]
+
+[tool.scikit-build.metadata.version]
+provider = "scikit_build_core.metadata.regex"
+input = "python/cuju/_version.py"
+
+[tool.scikit-build.cmake.define]
+CMAKE_CUDA_ARCHITECTURES = { env = "CMAKE_CUDA_ARCHITECTURES", default = "native" }
+
+[tool.ruff]
+line-length = 100
+# `cuju` and the shared fixtures of `tests` import as first-party code.
+src = ["python", "tests"]
+indent-width = 4
+target-version = "py310"
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "N", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+# GRF's scenario API keeps GRF's method names.
+"python/cuju/scenarios.py" = ["N802", "N815"]
+"python/cuju/gfootball/env/config.py" = ["N802"]
+"python/cuju/gfootball/env/scenario_builder.py" = ["N802"]
+"python/cuju/gfootball/scenarios.py" = ["N816"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
