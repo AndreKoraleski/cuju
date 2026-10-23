@@ -1,0 +1,186 @@
+{
+    "about": "SHA-256 of every observation, reward and done flag of every step, then every get_state, for the seed and actions of cuju.check and tests/conftest.py: `steps` for the cases, and the steps of each long case, which `python -m cuju.check --long` and `CUJU_LONG=1 pytest tests/test_long.py` play",
+    "cases": {
+        "11_vs_11_competition/simple115v2": {
+            "assets": "11_vs_11_competition_l1_r0",
+            "digest": "3719384bd8a41a78de2e3df5937a5390e0cf6827882a5b847d8d278f2372900a",
+            "options": {}
+        },
+        "11_vs_11_easy_stochastic/simple115v2": {
+            "assets": "11_vs_11_easy_stochastic_l1_r0",
+            "digest": "236387015eff41370006791d6a5a925f383a78434a31e0b2057cdefe2f780cca",
+            "options": {}
+        },
+        "11_vs_11_hard_stochastic/simple115v2": {
+            "assets": "11_vs_11_hard_stochastic_l1_r0",
+            "digest": "cb24580152250516190b6199feb5f13254063fad6ef7122327232f1797d2372e",
+            "options": {}
+        },
+        "11_vs_11_kaggle/simple115v2": {
+            "assets": "11_vs_11_kaggle_l1_r0",
+            "digest": "6872ac1b374dcb5bd065980e26ced6c1a84542682ad7c4aef10dc99524a8455e",
+            "options": {}
+        },
+        "11_vs_11_stochastic/checkpoints": {
+            "assets": "11_vs_11_stochastic_l1_r0",
+            "digest": "51907e0376691435f4a8efbd829102732d44ee75d70d21f0dcbd9c01a4214045",
+            "options": {
+                "rewards": "scoring,checkpoints"
+            }
+        },
+        "11_vs_11_stochastic/simple115v2": {
+            "assets": "11_vs_11_stochastic_l1_r0",
+            "digest": "a56e57b6b25784de5446cfd60a62f8b168826e896a7536115ea30f2f7821d4fd",
+            "options": {}
+        },
+        "1_vs_1_easy/simple115v2": {
+            "assets": "1_vs_1_easy_l1_r0",
+            "digest": "1179b9a7b6843004dc324933bcf8dfd254ee3a26902ad66de745ce32f97701f8",
+            "options": {}
+        },
+        "5_vs_5/extracted": {
+            "assets": "5_vs_5_l1_r0",
+            "digest": "fe963e8349d02b6599e35f91b8dd8a1d939861ac9122decdde93e7c8c7b8f0b2",
+            "options": {
+                "representation": "extracted"
+            }
+        },
+        "5_vs_5/raw": {
+            "assets": "5_vs_5_l1_r1",
+            "digest": "4fe3478421ab22ae93de7be2a8654c8047d5ca70b022cccebecf93209f71a6f7",
+            "options": {
+                "representation": "raw"
+            }
+        },
+        "5_vs_5/simple115v2": {
+            "assets": "5_vs_5_l1_r0",
+            "digest": "8fa88c9a5097634df66449be0a1758feadb29a04b9254557a7e4abcc9729dc7b",
+            "options": {}
+        },
+        "5_vs_5/stacked": {
+            "assets": "5_vs_5_l4_r0",
+            "digest": "6f9af9b85076e3b1373687b47e1794ea395452645eaecab3a13914ec04b01984",
+            "options": {
+                "stacked": true
+            }
+        },
+        "academy_3_vs_1_with_keeper/simple115v2": {
+            "assets": "academy_3_vs_1_with_keeper_l1_r0",
+            "digest": "1f8ef77c86e96760e35ce4190307f252e5dda4a5ae5a5bb6cfd0e9ea460f9ba4",
+            "options": {}
+        },
+        "academy_corner/simple115v2": {
+            "assets": "academy_corner_l1_r0",
+            "digest": "aa1a8c9e64e781f9159f420027888da99188b19a0e17c762c2b5c2587a53bc25",
+            "options": {}
+        },
+        "academy_counterattack_easy/simple115v2": {
+            "assets": "academy_counterattack_easy_l1_r0",
+            "digest": "99257553cfc669eef04a1c17e107ca93ee8aeeff0bfa4b36edb9edbadac7305a",
+            "options": {}
+        },
+        "academy_counterattack_hard/simple115v2": {
+            "assets": "academy_counterattack_hard_l1_r0",
+            "digest": "515fa179c77c6208e6e8a3c4fecd50438a06198d7dcc6b5f56b6554b3dc9e065",
+            "options": {}
+        },
+        "academy_empty_goal/simple115v2": {
+            "assets": "academy_empty_goal_l1_r0",
+            "digest": "b94ed3e7ff297f978f969d1b5cbf631305fddc8ed80a06847fdc8834253accba",
+            "options": {}
+        },
+        "academy_empty_goal_close/simple115v2": {
+            "assets": "academy_empty_goal_close_l1_r0",
+            "digest": "d09ed95d3ef78cbd65aec35d982b15c004ba32a4c66449c273f07fe16910c5ff",
+            "options": {}
+        },
+        "academy_pass_and_shoot_with_keeper/simple115v2": {
+            "assets": "academy_pass_and_shoot_with_keeper_l1_r0",
+            "digest": "6bafc22797812d828e5aef86a951abab597c28321572713689bccd47ad1e9575",
+            "options": {}
+        },
+        "academy_run_pass_and_shoot_with_keeper/simple115v2": {
+            "assets": "academy_run_pass_and_shoot_with_keeper_l1_r0",
+            "digest": "aa4409b02711bd20448606096e0d0fad6cc76c13ca2d432a03841a3aedff8c5c",
+            "options": {}
+        },
+        "academy_run_to_score/simple115v2": {
+            "assets": "academy_run_to_score_l1_r0",
+            "digest": "167ab1f375a82d6fe98bff6efbb3afd5f2ad693eb4c6a83cbbbbe5dca1a2e674",
+            "options": {}
+        },
+        "academy_run_to_score_with_keeper/simple115v2": {
+            "assets": "academy_run_to_score_with_keeper_l1_r0",
+            "digest": "af44d6a773fe615ed2bb180e990d7581ef177cb71003e08b89ee9e6c039ff5c1",
+            "options": {}
+        },
+        "academy_single_goal_versus_lazy/simple115v2": {
+            "assets": "academy_single_goal_versus_lazy_l1_r0",
+            "digest": "3e60b4c5b9980b9082429ff7da933ffeedf944dd6ee2cd3b54bfc68afd92ad0a",
+            "options": {}
+        },
+        "mixed": {
+            "assets": [
+                "5_vs_5_l4_r4",
+                "11_vs_11_stochastic_l1_r0"
+            ],
+            "digest": "3f9a16a895f032e9be7dc1de5f349f3847c6d3b3d4a718bc13f4d9d49c1f7890",
+            "options": {
+                "assignment": [
+                    0,
+                    1,
+                    0,
+                    1
+                ]
+            }
+        },
+        "test_example_multiagent/simple115v2": {
+            "assets": "test_example_multiagent_l1_r0",
+            "digest": "f75461d2f6fc051502273b13900edf68bbf4b827fcdd53b7ea4a95eafc1bbe89",
+            "options": {}
+        }
+    },
+    "environments": 4,
+    "long_cases": {
+        "11_vs_11_kaggle/full_match": {
+            "assets": "11_vs_11_kaggle_l1_r1",
+            "digest": "07c66ad46f727a2df832135f9eb74a7aee8b5bf8ece7adf59516716e6a910761",
+            "options": {},
+            "steps": 3010
+        },
+        "11_vs_11_stochastic/full_match_raw": {
+            "assets": "11_vs_11_stochastic_l1_r0",
+            "digest": "4749bfe5a400b1577642d606f253a297e0bb3886a27bb8b2b7e07261118997b1",
+            "options": {
+                "representation": "raw"
+            },
+            "steps": 3010
+        },
+        "5_vs_5/full_match_checkpoints": {
+            "assets": "5_vs_5_l4_r0",
+            "digest": "f8c7e497ca8d4711dfe405c3afd67748d7d0ec85275b12b64cbd18a91b62d37e",
+            "options": {
+                "rewards": "scoring,checkpoints"
+            },
+            "steps": 3010
+        },
+        "academy_counterattack_hard/episodes_extracted": {
+            "assets": "academy_counterattack_hard_l4_r0",
+            "digest": "117dfc67fb936e0c6a6f2357b7a56aee3ec6c78120848115264048c4338927d3",
+            "options": {
+                "representation": "extracted"
+            },
+            "steps": 1500
+        },
+        "academy_empty_goal_close/episodes_checkpoints": {
+            "assets": "academy_empty_goal_close_l1_r0",
+            "digest": "e9f4ae4553673bd4ec3de97739fd70216b3ec2343ca73caa3d40f2c28ec985d3",
+            "options": {
+                "rewards": "scoring,checkpoints"
+            },
+            "steps": 2000
+        }
+    },
+    "seed": 7,
+    "steps": 100
+}
