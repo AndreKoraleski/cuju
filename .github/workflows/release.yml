@@ -1,0 +1,312 @@
+# Copyright 2026 The cuju Authors
+# SPDX-License-Identifier: Apache-2.0
+
+name: release
+
+# A tag or a dispatch builds and checks the sdist and every wheel. Only a dispatch with `publish`
+# set publishes them, through PyPI's trusted publishing and the `pypi` environment's approval.
+on:
+    push:
+        tags: ['v*']
+    workflow_dispatch:
+        inputs:
+            publish:
+                description: Publish the sdist and the wheels to PyPI
+                type: boolean
+                default: false
+
+permissions:
+    contents: read
+
+# Every build runs twice and the two must agree byte for byte, so anyone can rebuild a release from
+# its tag and get the published files: each file is dated by the tagged commit (SOURCE_DATE_EPOCH)
+# and the libraries hold no directory, process id or time of the build machine.
+jobs:
+    sdist:
+        runs-on: ubuntu-24.04
+        steps:
+            - uses: actions/checkout@v7
+            - uses: actions/setup-python@v7
+              with:
+                  python-version: '3.12'
+            - name: Date every file of the build by the commit
+              run: echo "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)" >> "$GITHUB_ENV"
+            - name: Build the sdist twice and compare the bytes
+              run: |
+                  pip install build
+                  python -m build --sdist --outdir dist
+                  python -m build --sdist --outdir "$RUNNER_TEMP/sdist-again"
+                  python ci/compare_builds.py dist "$RUNNER_TEMP/sdist-again"
+            - uses: actions/upload-artifact@v7
+              with:
+                  name: sdist
+                  path: dist/*.tar.gz
+
+    # One wheel per platform. Linux builds in the manylinux_2_28 image with cibuildwheel, each build
+    # in a new container; macOS and Windows build on the runner, the second time from an empty
+    # build directory.
+    wheel:
+        name: wheel ${{ matrix.name }}
+        runs-on: ${{ matrix.runner }}
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    # The CPU library from Clang, about 10% faster than GCC and as exact, and the
+                    # CUDA library for the checked GPUs. `-real` keeps the PTX out: a driver would
+                    # compile PTX for a GPU that no check covered, where the library must instead
+                    # refuse to start.
+                    - name: linux-x86-64
+                      runner: ubuntu-24.04
+                      cibuildwheel: cp312-manylinux_x86_64
+                      before_all: bash ci/install_cuda.sh
+                      environment: >-
+                          PATH=/usr/local/cuda/bin:$PATH
+                          CXX=clang++ CUDAHOSTCXX=g++
+                          CMAKE_ARGS=-DCUJU_CUDA=ON
+                          CMAKE_CUDA_ARCHITECTURES="75-real;80-real;86-real;89-real"
+                    - name: linux-aarch64
+                      runner: ubuntu-24.04-arm
+                      cibuildwheel: cp312-manylinux_aarch64
+                      before_all: dnf install -y clang
+                      environment: CXX=clang++ CMAKE_ARGS=-DCUJU_CUDA=OFF
+                      cpu_only: true
+                    # CUDA 12.9 takes the MSVC of Visual Studio 2017 to 2022, which windows-2025
+                    # (Visual Studio 2026) has no longer.
+                    - name: windows-x86-64
+                      runner: windows-2022
+                      cmake_args: -DCUJU_CUDA=ON
+                      cuda_architectures: 75-real;80-real;86-real;89-real
+                      cuda: true
+                    - name: macos-arm64
+                      runner: macos-14
+                      cmake_args: -DCUJU_CUDA=OFF
+                      deployment_target: '11.0'
+                      cpu_only: true
+                    # GitHub retired macos-13; macos-15-intel is the x86-64 image left.
+                    - name: macos-x86-64
+                      runner: macos-15-intel
+                      cmake_args: -DCUJU_CUDA=OFF
+                      deployment_target: '10.15'
+                      cpu_only: true
+        defaults:
+            run:
+                shell: bash
+        env:
+            PIP_DISABLE_PIP_VERSION_CHECK: '1'
+        steps:
+            - uses: actions/checkout@v7
+            - uses: actions/setup-python@v7
+              with:
+                  python-version: '3.12'
+            - name: Date every file of the build by the commit
+              run: echo "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)" >> "$GITHUB_ENV"
+            - name: Install the CUDA toolkit
+              if: matrix.cuda
+              uses: Jimver/cuda-toolkit@v0.2.36
+              with:
+                  cuda: '12.9.1'
+                  method: network
+                  sub-packages: '["nvcc", "cudart", "visual_studio_integration"]'
+            # What `vcvars64.bat` sets, for the steps that follow.
+            - name: Use MSVC from the command line
+              if: runner.os == 'Windows'
+              shell: pwsh
+              run: |
+                  $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+                  $vs = & $vswhere -latest -products * -property installationPath `
+                      -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64
+                  $before = @{}
+                  Get-ChildItem env: | ForEach-Object { $before[$_.Name] = $_.Value }
+                  cmd /c "`"$vs\VC\Auxiliary\Build\vcvars64.bat`" >nul && set" | ForEach-Object {
+                      if ($_ -match '^([^=]+)=(.*)$' -and $before[$matches[1]] -ne $matches[2]) {
+                          "$($matches[1])=$($matches[2])" >> $env:GITHUB_ENV
+                      }
+                  }
+            - name: Describe the runner
+              run: |
+                  python -c "import platform, sys; print(platform.platform(), platform.machine(), sys.version)"
+                  cmake --version | head -n 1
+                  if [ "$RUNNER_OS" = Windows ]; then cl 2>&1 | head -n 1; nvcc --version | tail -n 2;
+                  elif [ "$RUNNER_OS" = macOS ]; then clang++ --version | head -n 1; sysctl -n machdep.cpu.brand_string;
+                  fi
+            - name: Build the wheel twice in the manylinux image
+              if: runner.os == 'Linux'
+              env:
+                  CIBW_BUILD: ${{ matrix.cibuildwheel }}
+                  CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+                  CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
+                  CIBW_BEFORE_ALL: ${{ matrix.before_all }}
+                  CIBW_ENVIRONMENT: ${{ matrix.environment }}
+                  CIBW_ENVIRONMENT_PASS_LINUX: SOURCE_DATE_EPOCH
+                  CIBW_CONFIG_SETTINGS: build.verbose=true
+                  CIBW_BUILD_VERBOSITY: '1'
+              run: |
+                  python -m pip install cibuildwheel==4.3.4
+                  python -m cibuildwheel --output-dir wheelhouse 2>&1 | tee build.log
+                  python -m cibuildwheel --output-dir wheelhouse-again 2>&1 | tee build-again.log
+            - name: Build the wheel twice on the runner
+              if: runner.os != 'Linux'
+              env:
+                  CMAKE_ARGS: ${{ matrix.cmake_args }}
+                  CMAKE_CUDA_ARCHITECTURES: ${{ matrix.cuda_architectures }}
+                  MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
+              run: |
+                  if [ -z "$CMAKE_CUDA_ARCHITECTURES" ]; then unset CMAKE_CUDA_ARCHITECTURES; fi
+                  if [ -z "$MACOSX_DEPLOYMENT_TARGET" ]; then unset MACOSX_DEPLOYMENT_TARGET; fi
+                  if [ "$RUNNER_OS" = Windows ]; then export CMAKE_GENERATOR=Ninja; fi
+                  python -m pip install --upgrade pip ninja
+                  python -m pip wheel . --no-deps -v -w wheelhouse -C build.verbose=true 2>&1 | tee build.log
+                  rm -rf build
+                  python -m pip wheel . --no-deps -v -w wheelhouse-again -C build.verbose=true 2>&1 \
+                      | tee build-again.log
+            - name: Compare the two builds
+              run: python ci/compare_builds.py wheelhouse wheelhouse-again
+            - name: Check the compile flags
+              run: |
+                  grep -ohE "fp:precise|ffp-contract=off" build.log | sort | uniq -c
+                  if grep -E "fp:fast|fp:contract|ffast-math|ffp-contract=(fast|on)" build.log; then
+                      echo "a contracting or fast-math flag reached the build"; exit 1
+                  fi
+            - name: Check the licenses and the libraries of the wheel
+              run: |
+                  python ci/check_wheel.py ${{ matrix.cpu_only && '--cpu-only' || '' }} wheelhouse/*.whl
+                  ls -l wheelhouse
+                  python -c "import sys, zipfile; [print(n) for n in zipfile.ZipFile(sys.argv[1]).namelist() if not n.startswith('cuju/gfootball')]" wheelhouse/*.whl
+            - uses: actions/upload-artifact@v7
+              with:
+                  name: wheel-${{ matrix.name }}
+                  path: wheelhouse/*.whl
+            - uses: actions/upload-artifact@v7
+              if: always()
+              with:
+                  name: build-log-${{ matrix.name }}
+                  path: build*.log
+
+    # Each wheel installs with pip into a new environment on a fresh runner of its platform, and the
+    # self-check plays every case on the CPU against the expected digests from outside the source
+    # tree. The runners have no GPU; the CUDA library is checked on a GPU of its own.
+    test:
+        name: test ${{ matrix.name }}
+        needs: wheel
+        # Each platform's test needs only its own wheel, so one failed build stops no other test.
+        if: ${{ !cancelled() }}
+        runs-on: ${{ matrix.runner }}
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - name: linux-x86-64
+                      runner: ubuntu-24.04
+                      torch: torch --index-url https://download.pytorch.org/whl/cpu
+                    - name: linux-aarch64
+                      runner: ubuntu-24.04-arm
+                      torch: torch --index-url https://download.pytorch.org/whl/cpu
+                    - name: windows-x86-64
+                      runner: windows-2025
+                      torch: torch --index-url https://download.pytorch.org/whl/cpu
+                    - name: macos-arm64
+                      runner: macos-15
+                      torch: torch
+                    # PyTorch's last x86-64 macOS wheel is 2.2.2, built against numpy 1.
+                    - name: macos-x86-64
+                      runner: macos-15-intel
+                      torch: torch==2.2.2 'numpy<2'
+        defaults:
+            run:
+                shell: bash
+        env:
+            PIP_DISABLE_PIP_VERSION_CHECK: '1'
+        steps:
+            - uses: actions/checkout@v7
+            - uses: actions/setup-python@v7
+              with:
+                  python-version: '3.12'
+            - uses: actions/download-artifact@v8
+              with:
+                  name: wheel-${{ matrix.name }}
+                  path: wheelhouse
+            - name: Make a new environment
+              run: |
+                  python -m venv "$RUNNER_TEMP/venv"
+                  if [ "$RUNNER_OS" = Windows ]; then
+                      echo "VENV_PYTHON=$RUNNER_TEMP/venv/Scripts/python.exe" >> "$GITHUB_ENV"
+                  else
+                      echo "VENV_PYTHON=$RUNNER_TEMP/venv/bin/python" >> "$GITHUB_ENV"
+                  fi
+            - name: Install PyTorch for the CPU
+              run: '"$VENV_PYTHON" -m pip install ${{ matrix.torch }}'
+            - name: Install the wheel
+              run: |
+                  wheel=$(ls wheelhouse/cuju-*.whl)
+                  echo "WHEEL=$wheel" >> "$GITHUB_ENV"
+                  "$VENV_PYTHON" -m pip install "$wheel"
+                  "$VENV_PYTHON" -m pip list
+            - name: cuju.check on the CPU
+              working-directory: ${{ runner.temp }}
+              run: '"$VENV_PYTHON" -I -m cuju.check --device cpu 2>&1 | tee check.log'
+            # The tests take the extras.
+            - name: The public tests
+              working-directory: ${{ runner.temp }}
+              run: |
+                  "$VENV_PYTHON" -m pip install "$GITHUB_WORKSPACE/$WHEEL[test,spaces]"
+                  "$VENV_PYTHON" -m pytest -ra -p no:cacheprovider "$GITHUB_WORKSPACE/tests"
+            - uses: actions/upload-artifact@v7
+              if: always()
+              with:
+                  name: check-${{ matrix.name }}
+                  path: ${{ runner.temp }}/check.log
+                  if-no-files-found: ignore
+
+    # An SPDX document per wheel and per sdist. syft reads the package's metadata; the code that the
+    # libraries compile in or link statically (see NOTICE, and the CUDA runtime) has no metadata it
+    # can read.
+    sbom:
+        needs: [sdist, wheel]
+        runs-on: ubuntu-24.04
+        steps:
+            - uses: actions/download-artifact@v8
+              with:
+                  path: dist
+                  pattern: '{sdist,wheel-*}'
+                  merge-multiple: true
+            - uses: anchore/sbom-action/download-syft@v0
+              id: syft
+            - name: Write the SBOM of each wheel and sdist
+              run: |
+                  mkdir -p sbom unpacked
+                  for file in dist/*.whl dist/*.tar.gz; do
+                      name=$(basename "$file" .whl)
+                      name=${name%.tar.gz}
+                      version=$(echo "$name" | cut -d- -f2)
+                      mkdir -p "unpacked/$name"
+                      case $file in
+                          *.whl) unzip -q "$file" -d "unpacked/$name" ;;
+                          *) tar -xzf "$file" -C "unpacked/$name" ;;
+                      esac
+                      "${{ steps.syft.outputs.cmd }}" scan "dir:unpacked/$name" \
+                          --source-name "${name%%-*}" --source-version "$version" \
+                          -o "spdx-json=sbom/$name.spdx.json"
+                  done
+                  ls -l sbom
+            - uses: actions/upload-artifact@v7
+              with:
+                  name: sbom
+                  path: sbom/*.spdx.json
+
+    # Only the sdist and the wheels of `cuju` are published; the SBOMs stay workflow artifacts.
+    publish:
+        needs: [sdist, wheel, test, sbom]
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        runs-on: ubuntu-24.04
+        # The environment requires a maintainer's approval before anything is published.
+        environment: pypi
+        permissions:
+            id-token: write
+        steps:
+            - uses: actions/download-artifact@v8
+              with:
+                  path: dist
+                  pattern: '{sdist,wheel-*}'
+                  merge-multiple: true
+            - uses: pypa/gh-action-pypi-publish@release/v1

@@ -1,0 +1,73 @@
+# Copyright 2026 The cuju Authors
+# SPDX-License-Identifier: Apache-2.0
+
+name: ci
+
+on:
+    push:
+    pull_request:
+
+jobs:
+    cpu:
+        runs-on: ubuntu-24.04
+        steps:
+            - uses: actions/checkout@v7
+            - uses: actions/setup-python@v7
+              with:
+                  python-version: '3.12'
+            - name: Install PyTorch for the CPU
+              run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+            - name: Build and install the CPU backend
+              run: CMAKE_ARGS=-DCUJU_CUDA=OFF pip install '.[test,spaces]' ruff
+            - name: Lint
+              run: |
+                  ruff check python tests examples
+                  ruff format --check python tests examples
+                  find include src -name '*.h' -o -name '*.cuh' -o -name '*.cpp' -o -name '*.cu' \
+                      | xargs clang-format-18 --dry-run -Werror
+            - name: Self-check
+              run: pytest tests
+
+    # The same expected digests on an aarch64 host, which is what lets aarch64 wheels ship.
+    cpu-arm:
+        runs-on: ubuntu-24.04-arm
+        steps:
+            - uses: actions/checkout@v7
+            - uses: actions/setup-python@v7
+              with:
+                  python-version: '3.12'
+            - name: Install PyTorch for the CPU
+              run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+            - name: Build and install the CPU backend
+              run: CMAKE_ARGS=-DCUJU_CUDA=OFF pip install '.[test,spaces]'
+            - name: Self-check
+              run: pytest tests
+
+    # The same expected digests from MSVC on Windows, which a Windows wheel would need first.
+    cpu-windows:
+        runs-on: windows-2022
+        steps:
+            - uses: actions/checkout@v7
+            - uses: actions/setup-python@v7
+              with:
+                  python-version: '3.12'
+            - name: Install PyTorch for the CPU
+              run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+            - name: Build and install the CPU backend
+              run: pip install ".[test,spaces]"
+              env:
+                  CMAKE_ARGS: -DCUJU_CUDA=OFF
+            - name: Self-check
+              run: pytest tests
+
+    cuda-compile:
+        runs-on: ubuntu-24.04
+        container: nvidia/cuda:12.9.1-devel-ubuntu24.04
+        steps:
+            - uses: actions/checkout@v7
+            - name: Install the build tools
+              run: apt-get update && apt-get install -y --no-install-recommends cmake g++ make
+            - name: Compile the CUDA backend for one architecture
+              run: |
+                  cmake -S . -B build -DCUJU_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=80
+                  cmake --build build --target cuju_cuda -j 4
