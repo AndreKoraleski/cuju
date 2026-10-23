@@ -1,0 +1,20 @@
+# Copyright 2026 The cuju Authors
+# SPDX-License-Identifier: Apache-2.0
+
+name: Missing GRF feature
+description: Something Google Research Football offers that cuju doesn't.
+labels: [grf-feature]
+body:
+    - type: input
+      id: grf-call
+      attributes:
+          label: The GRF call or option
+          description: Such as an option of `create_environment` or a wrapper.
+      validations:
+          required: true
+    - type: textarea
+      id: use
+      attributes:
+          label: What you use it for
+      validations:
+          required: true

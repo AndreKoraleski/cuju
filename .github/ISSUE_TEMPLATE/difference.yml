@@ -1,0 +1,58 @@
+# Copyright 2026 The cuju Authors
+# SPDX-License-Identifier: Apache-2.0
+
+name: Difference from GRF
+description: cuju and Google Research Football give different outputs for the same input.
+labels: [difference]
+body:
+    - type: markdown
+      attributes:
+          value: |
+              Thank you. A difference we can reproduce is a bug, and we fix it toward GRF.
+              The fastest way to a fix is the state from `get_state` just before the two diverge.
+    - type: input
+      id: cuju-version
+      attributes:
+          label: cuju version
+          description: "`python -c \"import importlib.metadata as m; print(m.version('cuju'))\"`"
+      validations:
+          required: true
+    - type: dropdown
+      id: backend
+      attributes:
+          label: Backend
+          options: [cuda, cpu, both]
+      validations:
+          required: true
+    - type: textarea
+      id: grf-build
+      attributes:
+          label: Your GRF
+          description: The GRF version or commit, the operating system, and the glibc and GCC it was built with.
+      validations:
+          required: true
+    - type: textarea
+      id: setup
+      attributes:
+          label: Scenario, options and seed
+          description: The `BatchEnvironment` call, and the `create_environment` call on the GRF side.
+          render: python
+      validations:
+          required: true
+    - type: textarea
+      id: divergence
+      attributes:
+          label: Where they diverge
+          description: The first step that differs and what differs (observation, reward, done flag or state).
+      validations:
+          required: true
+    - type: textarea
+      id: attachments
+      attributes:
+          label: State and actions
+          description: Attach the state bytes and the actions that reproduce it, if you can.
+    - type: textarea
+      id: self-check
+      attributes:
+          label: "Output of `pytest tests/`"
+          render: text

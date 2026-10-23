@@ -1,0 +1,60 @@
+cff-version: 1.2.0
+message: If you use cuju in your research, please cite it and Google Research Football.
+title: "cuju: a bit-exact, batched reimplementation of Google Research Football, for CUDA and CPU"
+type: software
+authors:
+    - family-names: Koraleski
+      given-names: André
+version: 0.1.0
+date-released: "2026-10-27"
+license:
+    - Apache-2.0
+    - LGPL-2.1-or-later
+    - MIT
+    - SunPro
+    - BSL-1.0
+    - BSD-3-Clause
+url: https://github.com/AndreKoraleski/cuju
+repository-code: https://github.com/AndreKoraleski/cuju
+abstract: >-
+    cuju is a bit-exact, batched reimplementation of Google Research Football for CUDA and the
+    CPU. For the same seed and actions, every state, observation, reward and done flag equals that
+    of Google Research Football 2.10.3, bit for bit.
+keywords:
+    - reinforcement learning
+    - multi-agent
+    - google research football
+    - cuda
+references:
+    - type: conference-paper
+      title: "Google Research Football: A Novel Reinforcement Learning Environment"
+      authors:
+          - family-names: Kurach
+            given-names: Karol
+          - family-names: Raichuk
+            given-names: Anton
+          - family-names: Stańczyk
+            given-names: Piotr
+          - family-names: Zając
+            given-names: Michał
+          - family-names: Bachem
+            given-names: Olivier
+          - family-names: Espeholt
+            given-names: Lasse
+          - family-names: Riquelme
+            given-names: Carlos
+          - family-names: Vincent
+            given-names: Damien
+          - family-names: Michalski
+            given-names: Marcin
+          - family-names: Bousquet
+            given-names: Olivier
+          - family-names: Gelly
+            given-names: Sylvain
+      collection-title: Proceedings of the AAAI Conference on Artificial Intelligence
+      volume: 34
+      issue: 4
+      start: 4501
+      end: 4510
+      year: 2020
+      doi: 10.1609/aaai.v34i04.5878

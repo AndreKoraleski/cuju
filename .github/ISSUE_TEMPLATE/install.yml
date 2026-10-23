@@ -1,0 +1,30 @@
+# Copyright 2026 The cuju Authors
+# SPDX-License-Identifier: Apache-2.0
+
+name: Installation problem
+description: cuju doesn't install, build or load.
+labels: [install]
+body:
+    - type: dropdown
+      id: route
+      attributes:
+          label: How you installed
+          options: [pip install cuju, from source, Docker, WSL2]
+      validations:
+          required: true
+    - type: textarea
+      id: system
+      attributes:
+          label: System
+          description: |
+              The output of `nvidia-smi`, `nvcc --version` (for a source build), `python -c "import torch; print(torch.__version__, torch.version.cuda)"`, and `grep -o -w 'avx2\|bmi2\|fma' /proc/cpuinfo | sort -u`.
+          render: text
+      validations:
+          required: true
+    - type: textarea
+      id: log
+      attributes:
+          label: The error and the log
+          render: text
+      validations:
+          required: true

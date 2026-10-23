@@ -1,0 +1,22 @@
+# Copyright 2026 The cuju Authors
+# SPDX-License-Identifier: Apache-2.0
+
+name: Performance
+description: cuju runs slower than the published numbers on comparable hardware.
+labels: [performance]
+body:
+    - type: textarea
+      id: hardware
+      attributes:
+          label: Hardware
+          description: The GPU or CPU model, the driver, and how many cores the process may use.
+      validations:
+          required: true
+    - type: textarea
+      id: run
+      attributes:
+          label: What you ran
+          description: The command of `examples/benchmark.py`, or your own code, and the number you got.
+          render: text
+      validations:
+          required: true

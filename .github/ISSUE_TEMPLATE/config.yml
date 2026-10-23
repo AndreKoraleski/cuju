@@ -1,0 +1,8 @@
+# Copyright 2026 The cuju Authors
+# SPDX-License-Identifier: Apache-2.0
+
+blank_issues_enabled: false
+contact_links:
+    - name: Questions
+      url: https://github.com/AndreKoraleski/cuju/discussions
+      about: Ask and discuss in GitHub Discussions.

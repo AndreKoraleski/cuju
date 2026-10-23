@@ -1,0 +1,27 @@
+# Copyright 2026 The cuju Authors
+# SPDX-License-Identifier: Apache-2.0
+
+name: Bug
+description: Something else doesn't work as the documentation says.
+labels: [bug]
+body:
+    - type: input
+      id: cuju-version
+      attributes:
+          label: cuju version
+      validations:
+          required: true
+    - type: textarea
+      id: reproduce
+      attributes:
+          label: How to reproduce it
+          description: The shortest code that shows the problem.
+          render: python
+      validations:
+          required: true
+    - type: textarea
+      id: expected
+      attributes:
+          label: What you expected, and what happened
+      validations:
+          required: true
