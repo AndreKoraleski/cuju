@@ -21,7 +21,7 @@ PyTorch first. A check that ships with the package then confirms the install.
 
 ```sh
 pip install cuju
-python -m cuju.check
+cuju check
 ```
 
 The check plays a set of fixed cases on the CPU and on every GPU it finds, compares each with the
@@ -135,7 +135,8 @@ Each topic has an article of its own.
 | [Observations](observations.md) | What an agent sees, in what shape and at what cost. |
 | [Rewards and actions](rewards-and-actions.md) | What an agent is paid for and what it can do. |
 | [Episodes and seeds](episodes-and-seeds.md) | The end of an episode and the match that each environment plays. |
-| [States](states.md) | Saving, restoring and moving a match between cuju and GRF. |
+| [States](states.md) | Saving, restoring and moving a match between cuju and GRF, and reading single fields. |
+| [Rendering](rendering.md) | Watching matches in a browser, saved or live, and the team registry. |
 | [Backends](backends.md) | The GPU and CPU backends and their fit with PyTorch. |
 | [Performance](performance.md) | Measured throughput and the size of a batch. |
 | [Recipes](recipes.md) | Patterns for wiring a batch into training. |

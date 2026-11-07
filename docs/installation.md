@@ -1,7 +1,7 @@
 # Installation
 
 **Installation** of cuju takes one of three forms, a wheel from PyPI, a build from source, or a
-build inside a container image for Docker or Apptainer, and each ends with `python -m cuju.check`,
+build inside a container image for Docker or Apptainer, and each ends with `cuju check`,
 which confirms that the install plays the matches of Google Research Football, or GRF, bit for bit.
 PyPI holds a wheel for Linux on x86-64 and on Arm, for Windows, and for macOS on Apple silicon and
 on Intel processors, and the wheel for Linux on x86-64 serves WSL2 as well. A source build serves
@@ -81,7 +81,7 @@ the step eagerly with the same results, as [Backends](backends.md) describes. Th
 `pin_threads` and `numa` place threads under Linux alone, and on Windows and macOS the threads stay
 where the system puts them.
 
-On every platform, [`python -m cuju.check`](#install-check) reports whether the build plays GRF's
+On every platform, [`cuju check`](#install-check) reports whether the build plays GRF's
 matches, and the same command confirms each new machine.
 
 ## Installation methods
@@ -97,14 +97,16 @@ and the GPU is one of the wheel's architectures.
 A build from source covers GPUs outside the wheel, such as the H100 and the RTX 50 series, as well
 as builds with another compiler or other flags. It takes a few minutes and, for the CUDA library, a
 CUDA toolkit, and it places the check of exactness with the person who builds, through
-`python -m cuju.check --long` and `pytest tests/`.
+`cuju check --long` and `pytest tests/`.
 
 Docker runs a source build inside an image, for clusters, for continuous integration and for
 machines that keep no CUDA toolkit, and Apptainer runs the same image on clusters that offer
 Apptainer in place of Docker.
 
-Every method ends with `python -m cuju.check`, which reports in one to two minutes whether the
+Every method ends with `cuju check`, which reports in one to two minutes whether the
 install works and plays the matches of the release, as timed in [Install check](#install-check).
+Where the scripts folder of a user installation is missing from the path, as can happen on Windows,
+`python -m cuju check` runs the same command.
 
 ## PyTorch
 
@@ -164,7 +166,7 @@ The wheel carries machine code alone. It leaves out PTX, the intermediate code t
 compile for later GPUs at load, so that every GPU on which the wheel runs executes code that was
 checked. Other GPUs, such as the H100 at 9.0, the B200 at 10.0 or the RTX 50 series at
 12.0, run cuju from a source build. With the wheel, a CUDA batch on such a GPU fails with CUDA's
-report that no kernel image is available for the device, and `python -m cuju.check` names the
+report that no kernel image is available for the device, and `cuju check` names the
 GPU's compute capability and the build it needs. `device='cpu'` works on every machine.
 
 ## Source build
@@ -239,7 +241,7 @@ CMAKE_ARGS="-DCUJU_NVTX=ON" pip install .
 A build with non-default flags or compilers is followed by the tests of the
 [install check](#install-check), which establish whether the build is still exact. The same holds
 for a build for an architecture below compute capability 7.5, such as 7.0 for the V100, which lies
-outside the range that the project checks, and `python -m cuju.check --long` on that GPU
+outside the range that the project checks, and `cuju check --long` on that GPU
 establishes whether it plays GRF's matches.
 
 ### Windows
@@ -361,7 +363,7 @@ Two commands check an install.
 
 ```sh
 python -c "import cuju; b = cuju.BatchEnvironment('5_vs_5', environment_count=4, device='cpu'); print(b.reset().shape)"
-python -m cuju.check
+cuju check
 ```
 
 The first command prints `torch.Size([4, 1, 115])`, four environments, one agent each, and the 115
@@ -412,11 +414,11 @@ Each common install failure has a cause and a fix.
 | the first GPU step is slow | CUDA loads the kernel | expected, with timing from the second step |
 | "the GPU is out of memory", with the bytes needed and free | the batch does not fit next to what else holds the GPU | the batch created before other large allocations, a call to `torch.cuda.empty_cache()`, or fewer environments |
 | every step about ten times slower on Windows or WSL2 | the driver moved GPU memory into shared system memory | one batch per GPU and fewer environments, as in [Performance](performance.md) |
-| any other failure | | an issue with the output of `python -m cuju.check`, since issues are welcome |
+| any other failure | | an issue with the output of `cuju check`, since issues are welcome |
 
 ## See also
 
-- [Exactness](exactness.md), the meaning of each line of `python -m cuju.check`
+- [Exactness](exactness.md), the meaning of each line of `cuju check`
 - [Backends](backends.md), the GPU and CPU backends and their fit with PyTorch
 - [Performance](performance.md), the throughput of each backend and the cost of shared memory on Windows
 - [Custom scenarios](custom-scenarios.md), scenario files and the bundle cache

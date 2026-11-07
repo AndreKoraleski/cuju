@@ -7,6 +7,63 @@ compare only within one version, or across versions whose entries say the output
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Sample matches of eleven and of five a side, which the renderer's library receives on the first
+    start of the server, and `cuju render sample`, which adds them again.
+
+## [0.2.0] - 2026-11-07
+
+With default options, every output stays as it was in 0.1.0, bit for bit, on both backends.
+
+### Added
+
+- Renderer MVP medal entrance and match contribution screen with grades, achievements and charts.
+
+- Renderer Help page, resumable games from Home, team zip imports and page addresses.
+- Recording fields for the engine scorer, called offside player and scenario timing, with half
+    time in scenarios with a second half and separate episode and recording end cards.
+- Automatic kit mapping and editable model colors in the team editor, and a soundscape and a
+    crowd for each arena, with glass helmets for the players on the space station.
+- Renderer teams with dynamic counts, fixed player indices or roles, goalkeeper choices and
+    separate action sets for each side, and six GRF MARL training scenarios. Fixed sides can
+    keep their chosen player order through set pieces by routing observations and actions.
+- `cuju.state`, which reads single fields of a GRF state by path, through the C functions
+    `cuju_state_layout` and `cuju_state_gather`, in the rest frame or the frame of the pitch.
+- `cuju.render`, a renderer that shows matches in a browser in three dimensions with sound, from
+    recordings that `Recorder` saves or live from a running batch with `CUJU_RENDER` or `watch`,
+    reading states without changing them. It serves a local page with a library of recordings, a
+    registry of Kaggle submission folders that play requested matches, team customization and
+    custom player models, and ships art from GRF, three.js, Fabric.js, eleven KayKit characters with
+    KayKit's animation clips, and its arenas' sounds.
+- The renderer's page, with a Home page of live sources, recent recordings, links and credits, and
+    pages to watch, browse recordings, request matches, customize teams and set the field. It
+    presents matches as a broadcast does, with goal and decision replays, cards from the referee,
+    restarts that ease into place, a wind-down after the final whistle, an end of match show and a
+    broadcast mode without the page's controls, under a sky with a time of day, weather and five
+    arenas.
+- An ability from 0 to 1 for each side of a requested match, GRF's team difficulty for the players
+    that the built-in AI controls, through `cuju.render.play`, `cuju render play` and the Matches
+    page.
+- The players that a team of the renderer's registry controls, from the active player alone up to
+    every controllable player of its format, or the 10 outfield players with the goalkeeper left to
+    the built-in AI, played through Kaggle's multi-agent form. `cuju.kaggle.KaggleAgent` takes
+    `agents`, a list of agents that one function plays, and keeps its single agent form as it was.
+    Each frame of a recording marks the players that agents control on its step.
+- The renderer's page Play a game, where a person controls the active player of a side with the
+    keyboard or a controller of the Xbox layout against GRF's built-in AI, at real time, through
+    GRF's 19 actions, with two people on opposite sides, pause and resume, and saving to Recordings
+    enabled by default.
+- The environment variables `CUJU_RENDER`, `CUJU_RENDER_BACKLOG` and `CUJU_RENDER_HOME`.
+- The command `cuju`, with `cuju render`, which serves the renderer's page, registers teams and
+    plays requested matches, `cuju check`, the self-check of `python -m cuju.check`, `cuju replay`
+    and `cuju dump-to-txt`, GRF's scripts for dumps, `cuju help` and `cuju --version`. The modules
+    still run with `python -m`, and `python -m cuju check` stands in where the scripts folder of a
+    user installation is missing from the path.
+- The extra `render`, which names the renderer and adds no dependency beyond cuju's own.
+
 ## [0.1.0] - 2026-10-27
 
 The first public release.
@@ -85,4 +142,5 @@ The first public release.
 - GRF's ids registered with Gymnasium, and with gym before 0.26, as soon as either is imported, so
     that `import cuju` leaves both unloaded.
 
+[Unreleased]: https://github.com/AndreKoraleski/cuju/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/AndreKoraleski/cuju/releases/tag/v0.1.0

@@ -16,8 +16,8 @@ waiting for the simulator.
 
 cuju suits the cases where the simulator is the bottleneck, in on-policy and multi-agent training,
 self-play, large evaluations and hyperparameter sweeps, and every result that has to stand next to
-published GRF numbers. Watching a match is the work of GRF's own tools, which replay and render the
-dumps that cuju writes.
+published GRF numbers. Matches are watched in a browser with cuju's renderer, saved or live, as
+[Rendering](docs/rendering.md) describes, and GRF's own tools replay the dumps that cuju writes.
 
 cuju is an independent project, neither affiliated with nor endorsed by Google. Google Research
 Football is a project of Google Research, and Google is a trademark of Google LLC.
@@ -37,7 +37,7 @@ Football is a project of Google Research, and Google is a trademark of Google LL
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/AndreKoraleski/cuju/blob/main/examples/cuju_quickstart.ipynb)
 
-![A match of 11_vs_11_easy_stochastic in cuju from kick-off to the first goal, drawn from the raw observation](https://raw.githubusercontent.com/AndreKoraleski/cuju/main/docs/assets/cuju_board.gif)
+[![A teaser of cuju's renderer, a floodlit goal, the beach and space arenas, a team of custom players, the podium and a grid of many matches, linking to the full montage](https://raw.githubusercontent.com/AndreKoraleski/cuju/main/docs/assets/cuju-teaser.webp)](https://github.com/AndreKoraleski/cuju/blob/main/docs/assets/cuju-montage.mp4)
 
 ## Quick start
 
@@ -48,7 +48,7 @@ keeps it.
 
 ```sh
 pip install cuju
-python -m cuju.check  # ends with PASSED when the machine plays GRF's matches
+cuju check            # ends with PASSED when the machine plays GRF's matches
 ```
 
 ```python
@@ -114,7 +114,7 @@ The reference is GRF 2.10.3 at commit 3d9e754, without rendering, as built by GC
 with glibc 2.39 on a processor with FMA. Both backends give the same bits, whatever the number of
 threads.
 
-cuju is tested against GRF internally. Anyone can run its self-check. `python -m cuju.check`, in the
+cuju is tested against GRF internally. Anyone can run its self-check. `cuju check`, in the
 wheel, and `pytest tests/`, in the repository, need no GRF and tell whether a build reproduces the
 release bit for bit, and `examples/compare_with_grf.py` plays cuju next to a separately installed
 GRF. Issues are welcome, and a difference from GRF is the most valued report.
@@ -164,8 +164,12 @@ code for the architectures checked for exactness, 7.5, 8.0, 8.6 and 8.9, and oth
 source. On macOS on Intel processors, PyTorch ends with 2.2, and `torch.compile` traces a step
 from PyTorch 2.4 on. [Installation](docs/installation.md) gives the requirements of each platform.
 
-Rendering belongs to GRF's tools, which replay and render cuju's dumps, and the representation
-`pixels` waits for a renderer of cuju's own in a later release.
+Run `cuju render serve --open` to watch saved matches and live training in the browser. Its Home
+page leads to recordings, requested matches between teams, team and field editors and Play a game
+for keyboard or controller input. Teams can control one or several players, and Ability sets the
+strength of the built in AI. Watching preserves the match, as [Rendering](docs/rendering.md)
+describes. GRF's tools replay cuju's dumps and make videos, while the representation `pixels`
+remains GRF's.
 [Differences from GRF](docs/differences-from-grf.md) describes every known difference.
 
 ## Documentation
@@ -243,5 +247,6 @@ are ports of the GNU C Library under the LGPL 2.1 or later, and both libraries c
     LICENSES/ with them and offering the matching source, which every PyPI release carries as its
     sdist.
 - Compiling the C++ headers into another program brings the LGPL into that program.
-- The logo and the match clip in `docs/assets/` are licensed under CC BY 4.0, so they may be reused
-    with credit, without any right to the name or the logo as a mark of endorsement.
+- The logo, the montage, its teaser and its poster in `docs/assets/` are licensed under CC BY 4.0,
+    so they may be reused with credit, without any right to the name or the logo as a mark of
+    endorsement. The montage's music is "Upbeat loop" by mistermender, CC0 1.0.
