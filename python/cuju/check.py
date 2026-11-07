@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 """Checks that this installation reproduces the expected outputs, on the CPU and on every GPU.
 
-    python -m cuju.check                  # every case on the CPU and on every visible GPU
-    python -m cuju.check --long           # also the long cases, later episodes and the second half
-    python -m cuju.check --device cuda    # one backend, which must then be present
-    python -m cuju.check --list           # the setup and the cases, without playing them
+    cuju check                # every case on the CPU and on every visible GPU
+    cuju check --long         # also the long cases, later episodes and the second half
+    cuju check --device cuda  # one backend, which must then be present
+    cuju check --list         # the setup and the cases, without playing them
 
 It prints the setup, checks the package data against `data/SHA256SUMS`, and plays each case of
 `data/digests.json`, four environments with fixed actions whose outputs and final states hash into
@@ -401,9 +401,7 @@ def run_case(entry, device, index):
 def main(argv: list[str] | None = None) -> int:
     """Runs the check and returns its exit status, 0 if everything that ran matched, else 1."""
 
-    parser = argparse.ArgumentParser(
-        prog='python -m cuju.check', description=__doc__.splitlines()[0]
-    )
+    parser = argparse.ArgumentParser(prog='cuju check', description=__doc__.splitlines()[0])
     parser.add_argument('--device', choices=['all', 'cpu', 'cuda'], default='all')
     parser.add_argument(
         '--long', action='store_true', help='also play the long cases, several minutes'

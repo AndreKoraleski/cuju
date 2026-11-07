@@ -4,7 +4,7 @@
 
 """GRF's `gfootball.replay` without rendering, which plays a dump again and checks it.
 
-    python -m cuju.gfootball.replay --trace_file=/tmp/dumps/episode_done_20261026-120000000000.dump
+    cuju replay --trace_file=/tmp/dumps/episode_done_20261026-120000000000.dump
 
 It replays cuju's and GRF's dumps alike and compares every step with the dump's bit for bit, apart
 from the wall-clock time. It prints the first difference and exits 1 if there is one, and
@@ -44,7 +44,7 @@ def check(trace_file: str, device: Any = 'cpu', threads: int = 1) -> _replays.Re
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        prog='python -m cuju.gfootball.replay', description='Replays a dump and checks it.'
+        prog='cuju replay', description='Replays a dump and checks it.'
     )
     parser.add_argument('--trace_file', required=True, help='Trace file to replay')
     parser.add_argument(

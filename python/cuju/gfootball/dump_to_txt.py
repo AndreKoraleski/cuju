@@ -6,7 +6,7 @@
 
 It runs as GRF's script does, with `cuju.gfootball` for `gfootball`.
 
-    python -m cuju.gfootball.dump_to_txt --trace_file=/tmp/input.dump --output=/tmp/output.txt
+    cuju dump-to-txt --trace_file=/tmp/input.dump --output=/tmp/output.txt
 """
 
 from __future__ import annotations
@@ -30,7 +30,9 @@ def _flag(text: str) -> bool:
 
 def main(argv: list[str] | None = None) -> None:
     """Runs the script on `argv`, or on the command line without it."""
-    parser = argparse.ArgumentParser(description='Converts a dump file to a readable text file.')
+    parser = argparse.ArgumentParser(
+        prog='cuju dump-to-txt', description='Converts a dump file to a readable text file.'
+    )
     parser.add_argument('--trace_file', required=True, help='Trace file to convert')
     parser.add_argument('--output', required=True, help='Output txt file')
     parser.add_argument(
