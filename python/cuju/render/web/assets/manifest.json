@@ -1,0 +1,601 @@
+{
+  "version": 1,
+  "generator": "ci/render_assets.py",
+  "source": {
+    "project": "Google Research Football",
+    "path": "third_party/gfootball_engine/data/media",
+    "license": "Unlicense, public domain, third_party/gfootball_engine/LICENSE"
+  },
+  "frame": {
+    "axes": "engine frame, x along the pitch, y across it, z up, right handed",
+    "units": "meters",
+    "gltf": "every glb stays in the engine frame and is not turned to y up, so the viewer maps engine (x, y, z) to three (x, z, -y) once at the scene root, a turn of -90 degrees about x",
+    "quaternions": "x, y, z, w",
+    "texture_coordinates": "glTF, origin at the top left texel"
+  },
+  "skeleton": {
+    "nodes": ["player", "body", "middle", "neck", "left_shoulder", "left_elbow", "right_shoulder", "right_elbow", "left_thigh", "left_knee", "left_ankle", "right_thigh", "right_knee", "right_ankle"],
+    "parents": [-1, 0, 1, 2, 2, 4, 2, 6, 1, 8, 9, 1, 11, 12],
+    "rest_translation_local": [
+      [0.0, 0.0, 0.0],
+      [0.0, 0.0, 0.96],
+      [0.0, 0.0, 0.15],
+      [0.0, -0.03, 0.5],
+      [0.16, -0.01, 0.48],
+      [-0.01, -0.0, -0.33],
+      [-0.16, -0.01, 0.48],
+      [0.01, -0.0, -0.33],
+      [0.087, 0.0, -0.01],
+      [0.0, 0.0, -0.42],
+      [0.0, -0.04, -0.44],
+      [-0.087, 0.0, -0.01],
+      [0.0, 0.0, -0.42],
+      [0.0, -0.04, -0.44]
+    ],
+    "rest_translation_world": [
+      [0.0, 0.0, 0.0],
+      [0.0, 0.0, 0.96],
+      [0.0, 0.0, 1.11],
+      [0.0, -0.03, 1.61],
+      [0.16, -0.01, 1.59],
+      [0.15, -0.01, 1.26],
+      [-0.16, -0.01, 1.59],
+      [-0.15, -0.01, 1.26],
+      [0.087, 0.0, 0.95],
+      [0.087, 0.0, 0.53],
+      [0.087, -0.04, 0.09],
+      [-0.087, 0.0, 0.95],
+      [-0.087, 0.0, 0.53],
+      [-0.087, -0.04, 0.09]
+    ],
+    "rest_rotation": "identity for every node, local and world",
+    "player_object_rotations": [
+      [0.0, 0.0, 0.0, 1.0],
+      [0.0, 0.0, 0.0, 1.0],
+      [0.0, 0.0, 0.0, 1.0],
+      [0.0, 0.0, 0.0, 1.0],
+      [0.0, -0.087156, 0.0, 0.996195],
+      [-0.0, 0.052336, -0.0, 0.99863],
+      [0.0, 0.087156, 0.0, 0.996195],
+      [-0.0, -0.052336, -0.0, 0.99863],
+      [0.0, -0.017452, 0.0, 0.999848],
+      [-0.0, 0.017452, -0.0, 0.999848],
+      [0.0, 0.0, 0.0, 1.0],
+      [0.0, 0.017452, 0.0, 0.999848],
+      [-0.0, -0.017452, -0.0, 0.999848],
+      [0.0, 0.0, 0.0, 1.0]
+    ],
+    "note": "GRF's animations replace every local rotation of player.object, so the rotations written there never reach a pose. The bind pose of player.glb is straight.anim.util, player.object's positions with identity rotations, and joint world matrices from a recording, times the inverse bind matrices, give GRF's skinning exactly."
+  },
+  "player_scale": {
+    "reference_height_m": 1.92,
+    "rule": "GRF scales the skinned body by height / 1.92 about the player's ground point, the xy of node player, and moves the hair to the scaled neck without scaling the hair itself"
+  },
+  "appearance": {
+    "players": [
+      {
+        "index": 0,
+        "skin": "skin_01.png",
+        "hair": "hair_long02.glb",
+        "hair_color": "hair_blonde.png",
+        "height_m": 1.87
+      },
+      {
+        "index": 1,
+        "skin": "skin_02.png",
+        "hair": "hair_short02.glb",
+        "hair_color": "hair_black.png",
+        "height_m": 1.7
+      },
+      {
+        "index": 2,
+        "skin": "skin_04.png",
+        "hair": "hair_long02.glb",
+        "hair_color": "hair_black.png",
+        "height_m": 1.74
+      },
+      {
+        "index": 3,
+        "skin": "skin_01.png",
+        "hair": "hair_medium01.glb",
+        "hair_color": "hair_black.png",
+        "height_m": 1.93
+      },
+      {
+        "index": 4,
+        "skin": "skin_01.png",
+        "hair": "hair_short01.glb",
+        "hair_color": "hair_black.png",
+        "height_m": 1.72
+      },
+      {
+        "index": 5,
+        "skin": "skin_04.png",
+        "hair": "hair_long02.glb",
+        "hair_color": "hair_black.png",
+        "height_m": 1.71
+      },
+      {
+        "index": 6,
+        "skin": "skin_03.png",
+        "hair": "hair_long02.glb",
+        "hair_color": "hair_black.png",
+        "height_m": 1.89
+      },
+      {
+        "index": 7,
+        "skin": "skin_01.png",
+        "hair": "hair_long01.glb",
+        "hair_color": "hair_blonde.png",
+        "height_m": 1.84
+      },
+      {
+        "index": 8,
+        "skin": "skin_01.png",
+        "hair": "hair_medium01.glb",
+        "hair_color": "hair_black.png",
+        "height_m": 1.74
+      },
+      {
+        "index": 9,
+        "skin": "skin_02.png",
+        "hair": "hair_long02.glb",
+        "hair_color": "hair_black.png",
+        "height_m": 1.81
+      },
+      {
+        "index": 10,
+        "skin": "skin_03.png",
+        "hair": "hair_short02.glb",
+        "hair_color": "hair_black.png",
+        "height_m": 1.69
+      }
+    ],
+    "same_for_both_teams": true,
+    "goalkeepers": "kit_goalkeeper.webp",
+    "teams": [
+      {
+        "side": "left",
+        "name": "Frequentists United",
+        "radar_color": [255, 100, 100],
+        "radar_secondary": [100, 100, 255]
+      },
+      {
+        "side": "right",
+        "name": "Real Bayesians",
+        "radar_color": [255, 255, 255],
+        "radar_secondary": [50, 50, 126]
+      }
+    ]
+  },
+  "pitch": {
+    "goal_lines_x": [-55.0, 55.0],
+    "touch_lines_y": [-36.0, 36.0],
+    "full_extent_m": {
+      "x": [-60.0, 60.0],
+      "y": [-40.0, 40.0]
+    },
+    "specular": "GRF bakes 2 plus 18 times the Perlin noise, without the noise 11 of 255"
+  },
+  "files": [
+    {
+      "file": "player.glb",
+      "role": "player",
+      "source": [
+        "objects/players/models/fullbody.ase",
+        "objects/players/player.object",
+        "animations/base.anim.util",
+        "animations/straight.anim.util"
+      ],
+      "skinned": true,
+      "joints": ["player", "body", "middle", "neck", "left_shoulder", "left_elbow", "right_shoulder", "right_elbow", "left_thigh", "left_knee", "left_ankle", "right_thigh", "right_knee", "right_ankle"],
+      "vertices": 542,
+      "triangles": 747,
+      "materials": {
+        "kit": ["sock_right", "sock_left", "body"],
+        "skin": ["knee_right", "knee_left", "arm_left", "arm_right", "head"],
+        "shoe": ["shoe_right", "shoe_left"],
+        "sole": ["sole_right", "sole_left"]
+      },
+      "material_textures": {
+        "kit": "a texture painted from kit_mask.png, or kit_goalkeeper.webp",
+        "skin": "skin_0N.png for the player, N in 1 to 4",
+        "shoe": "shoe.webp",
+        "sole": "shoe_sole.png"
+      },
+      "normal_textures": {
+        "kit": "kit_normal.webp"
+      },
+      "bind_pose": "each joint at its straight position with identity world rotation",
+      "bytes": 37440
+    },
+    {
+      "file": "hair_long01.glb",
+      "role": "hair",
+      "source": [
+        "objects/players/hairstyles/long01.ase"
+      ],
+      "attach_joint": "neck",
+      "attach_index": 3,
+      "offset": {
+        "translation": [0, 0, 0],
+        "rotation": [0, 0, 0, 1]
+      },
+      "material_textures": {
+        "hair": "hair_<color>.png"
+      },
+      "bytes": 4660
+    },
+    {
+      "file": "hair_long02.glb",
+      "role": "hair",
+      "source": [
+        "objects/players/hairstyles/long02.ase"
+      ],
+      "attach_joint": "neck",
+      "attach_index": 3,
+      "offset": {
+        "translation": [0, 0, 0],
+        "rotation": [0, 0, 0, 1]
+      },
+      "material_textures": {
+        "hair": "hair_<color>.png"
+      },
+      "bytes": 4656
+    },
+    {
+      "file": "hair_medium01.glb",
+      "role": "hair",
+      "source": [
+        "objects/players/hairstyles/medium01.ase"
+      ],
+      "attach_joint": "neck",
+      "attach_index": 3,
+      "offset": {
+        "translation": [0, 0, 0],
+        "rotation": [0, 0, 0, 1]
+      },
+      "material_textures": {
+        "hair": "hair_<color>.png"
+      },
+      "bytes": 4672
+    },
+    {
+      "file": "hair_short01.glb",
+      "role": "hair",
+      "source": [
+        "objects/players/hairstyles/short01.ase"
+      ],
+      "attach_joint": "neck",
+      "attach_index": 3,
+      "offset": {
+        "translation": [0, 0, 0],
+        "rotation": [0, 0, 0, 1]
+      },
+      "material_textures": {
+        "hair": "hair_<color>.png"
+      },
+      "bytes": 4672
+    },
+    {
+      "file": "hair_short02.glb",
+      "role": "hair",
+      "source": [
+        "objects/players/hairstyles/short02.ase"
+      ],
+      "attach_joint": "neck",
+      "attach_index": 3,
+      "offset": {
+        "translation": [0, 0, 0],
+        "rotation": [0, 0, 0, 1]
+      },
+      "material_textures": {
+        "hair": "hair_<color>.png"
+      },
+      "bytes": 4672
+    },
+    {
+      "file": "ball.glb",
+      "role": "ball",
+      "source": [
+        "objects/balls/generic.ase",
+        "objects/balls/ball.bmp"
+      ],
+      "origin": "the ball centre, place it at the recorded ball position and rotation",
+      "radius_m": 0.11,
+      "embedded_textures": [
+        "ball.bmp as WebP"
+      ],
+      "bytes": 9624
+    },
+    {
+      "file": "goal.glb",
+      "role": "goals",
+      "source": [
+        "objects/stadiums/goals.ase",
+        "textures/stadium/goalnetting.bmp"
+      ],
+      "placement": "both goals in world coordinates of the engine frame, place at the origin",
+      "frame_bounds_m": {
+        "min": [-55.0536, -3.76, 0.0],
+        "max": [55.0485, 3.76, 2.54]
+      },
+      "net_bounds_m": {
+        "min": [-57.5539, -3.7, 0.0],
+        "max": [57.5483, 3.7, 2.5]
+      },
+      "embedded_textures": [
+        "goalnetting.bmp as PNG"
+      ],
+      "note": "GRF deforms the netting where the ball touches it, the mesh is the rest shape",
+      "bytes": 108724
+    },
+    {
+      "file": "kit_goalkeeper.webp",
+      "role": "kit of both goalkeepers",
+      "source": [
+        "objects/players/textures/goalie_kit.bmp"
+      ],
+      "srgb": true,
+      "applies_to": "material kit of player.glb",
+      "region_colors": {
+        "shirt": [80, 80, 80],
+        "shorts": [173, 222, 23],
+        "socks": [173, 222, 23]
+      },
+      "bytes": 5084
+    },
+    {
+      "file": "kit_mask.png",
+      "role": "kit recolor mask",
+      "source": [
+        "objects/players/textures/kit_template.bmp",
+        "objects/players/models/fullbody.ase"
+      ],
+      "channels": {
+        "r": "shirt and collar",
+        "g": "shorts",
+        "b": "socks"
+      },
+      "use": "albedo = r * shirt + g * shorts + b * socks, in sRGB, on the kit material",
+      "template_rows": {
+        "shirt_hem": 420,
+        "socks_top": 585,
+        "of": 1024
+      },
+      "bytes": 1737
+    },
+    {
+      "file": "kit_normal.webp",
+      "role": "kit normal map",
+      "source": [
+        "objects/players/textures/kit_UVWnormal.bmp"
+      ],
+      "srgb": false,
+      "applies_to": "material kit of player.glb, tangent space",
+      "bytes": 111304
+    },
+    {
+      "file": "skin_01.png",
+      "role": "skin tone",
+      "source": [
+        "objects/players/textures/skin01.bmp"
+      ],
+      "srgb": true,
+      "color": [228, 185, 163],
+      "applies_to": "material skin of player.glb",
+      "bytes": 83
+    },
+    {
+      "file": "skin_02.png",
+      "role": "skin tone",
+      "source": [
+        "objects/players/textures/skin02.bmp"
+      ],
+      "srgb": true,
+      "color": [183, 151, 132],
+      "applies_to": "material skin of player.glb",
+      "bytes": 83
+    },
+    {
+      "file": "skin_03.png",
+      "role": "skin tone",
+      "source": [
+        "objects/players/textures/skin03.bmp"
+      ],
+      "srgb": true,
+      "color": [144, 115, 96],
+      "applies_to": "material skin of player.glb",
+      "bytes": 83
+    },
+    {
+      "file": "skin_04.png",
+      "role": "skin tone",
+      "source": [
+        "objects/players/textures/skin04.bmp"
+      ],
+      "srgb": true,
+      "color": [102, 74, 55],
+      "applies_to": "material skin of player.glb",
+      "bytes": 82
+    },
+    {
+      "file": "hair_black.png",
+      "role": "hair color",
+      "source": [
+        "objects/players/textures/hair/black.bmp"
+      ],
+      "srgb": true,
+      "applies_to": "material hair of hair_<style>.glb",
+      "bytes": 2086
+    },
+    {
+      "file": "hair_blonde.png",
+      "role": "hair color",
+      "source": [
+        "objects/players/textures/hair/blonde.bmp"
+      ],
+      "srgb": true,
+      "applies_to": "material hair of hair_<style>.glb",
+      "bytes": 2590
+    },
+    {
+      "file": "hair_brown.png",
+      "role": "hair color",
+      "source": [
+        "objects/players/textures/hair/brown.bmp"
+      ],
+      "srgb": true,
+      "applies_to": "material hair of hair_<style>.glb",
+      "bytes": 2262
+    },
+    {
+      "file": "hair_darkblonde.png",
+      "role": "hair color",
+      "source": [
+        "objects/players/textures/hair/darkblonde.bmp"
+      ],
+      "srgb": true,
+      "applies_to": "material hair of hair_<style>.glb",
+      "bytes": 2449
+    },
+    {
+      "file": "hair_red.png",
+      "role": "hair color",
+      "source": [
+        "objects/players/textures/hair/red.bmp"
+      ],
+      "srgb": true,
+      "applies_to": "material hair of hair_<style>.glb",
+      "bytes": 2364
+    },
+    {
+      "file": "shoe.webp",
+      "role": "shoe",
+      "source": [
+        "objects/players/textures/shoe.bmp"
+      ],
+      "srgb": true,
+      "applies_to": "material shoe of player.glb",
+      "bytes": 1786
+    },
+    {
+      "file": "shoe_sole.png",
+      "role": "shoe sole",
+      "source": [
+        "objects/players/textures/shoe_sole.bmp"
+      ],
+      "srgb": true,
+      "applies_to": "material sole of player.glb",
+      "bytes": 82
+    },
+    {
+      "file": "pitch.webp",
+      "role": "pitch albedo with line markings",
+      "source": [
+        "textures/pitch/seamlessgrass08.bmp",
+        "textures/pitch/overlay.bmp"
+      ],
+      "srgb": true,
+      "extent_m": {
+        "x": [-60.0, 60.0],
+        "y": [-40.0, 40.0]
+      },
+      "orientation": "north up, top row at y = 40, left column at x = -60",
+      "note": "replaces pitch_01 to pitch_04, which GRF overwrites with this procedural bake",
+      "bytes": 26526
+    },
+    {
+      "file": "pitch_normal.webp",
+      "role": "pitch normal map, the mowing bands",
+      "source": [
+        "onthepitch/proceduralpitch.cpp GetPitchNormalColor"
+      ],
+      "srgb": false,
+      "extent_m": {
+        "x": [-60.0, 60.0],
+        "y": [-40.0, 40.0]
+      },
+      "orientation": "north up, as pitch.webp",
+      "encoding": "rgb = (n + 1) / 2 with r along +x, g along +y, b along +z of the engine",
+      "bytes": 1980
+    },
+    {
+      "file": "grass.webp",
+      "role": "tiling grass detail",
+      "source": [
+        "textures/pitch/seamlessgrass08.bmp"
+      ],
+      "srgb": true,
+      "tile_m": [20.8333, 20.8333],
+      "bytes": 69438
+    },
+    {
+      "file": "crowd.webp",
+      "role": "crowd, tiling, with alpha",
+      "source": [
+        "textures/stadium/crowd01.bmp"
+      ],
+      "srgb": true,
+      "bytes": 4388
+    },
+    {
+      "file": "crowd_normal.webp",
+      "role": "crowd normal map",
+      "source": [
+        "textures/stadium/crowd01_normal.bmp"
+      ],
+      "srgb": false,
+      "bytes": 9372
+    },
+    {
+      "file": "adboard_polygon.webp",
+      "role": "adboard",
+      "source": [
+        "textures/adboards/ad_polygon01.bmp"
+      ],
+      "srgb": true,
+      "bytes": 7406
+    },
+    {
+      "file": "adboard_your_ad_here.webp",
+      "role": "adboard",
+      "source": [
+        "textures/adboards/ad_your_ad_here.bmp"
+      ],
+      "srgb": true,
+      "bytes": 13606
+    }
+  ],
+  "checks": [
+    {
+      "file": "player.glb",
+      "base_pose_error_m": {
+        "single_bone_max": 9.000885811076055e-08,
+        "blended_max": 0.026938303540886516,
+        "blended_mean": 0.006303726890941258
+      }
+    },
+    {
+      "file": "hair_long01.glb"
+    },
+    {
+      "file": "hair_long02.glb"
+    },
+    {
+      "file": "hair_medium01.glb"
+    },
+    {
+      "file": "hair_short01.glb"
+    },
+    {
+      "file": "hair_short02.glb"
+    },
+    {
+      "file": "ball.glb"
+    },
+    {
+      "file": "goal.glb"
+    }
+  ]
+}
