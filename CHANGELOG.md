@@ -142,5 +142,6 @@ The first public release.
 - GRF's ids registered with Gymnasium, and with gym before 0.26, as soon as either is imported, so
     that `import cuju` leaves both unloaded.
 
-[Unreleased]: https://github.com/AndreKoraleski/cuju/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/AndreKoraleski/cuju/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/AndreKoraleski/cuju/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/AndreKoraleski/cuju/releases/tag/v0.1.0

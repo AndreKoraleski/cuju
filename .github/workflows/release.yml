@@ -79,7 +79,7 @@ jobs:
                       cuda_architectures: 75-real;80-real;86-real;89-real
                       cuda: true
                     - name: macos-arm64
-                      runner: macos-14
+                      runner: macos-15
                       cmake_args: -DCUJU_CUDA=OFF
                       deployment_target: '11.0'
                       cpu_only: true

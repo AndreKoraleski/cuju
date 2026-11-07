@@ -284,8 +284,8 @@ for machine code alone, as in the wheel. Its default is the wheel's four archite
 `75-real;80-real;86-real;89-real`, and a build for the RTX 40 series alone names `89-real`.
 
 ```sh
-docker build --build-arg CUDA_ARCHITECTURES=89-real -t cuju:0.1.0 .
-docker run --rm --gpus all cuju:0.1.0 python3 -m cuju.check
+docker build --build-arg CUDA_ARCHITECTURES=89-real -t cuju:0.2.0 .
+docker run --rm --gpus all cuju:0.2.0 python3 -m cuju.check
 ```
 
 The image installs PyTorch from PyPI by default. The build argument `TORCH_INDEX_URL` names another
@@ -293,7 +293,7 @@ index, such as `https://download.pytorch.org/whl/cu126` for a host whose driver 
 CUDA version of PyPI's build.
 
 ```sh
-docker build --build-arg TORCH_INDEX_URL=https://download.pytorch.org/whl/cu126 -t cuju:0.1.0 .
+docker build --build-arg TORCH_INDEX_URL=https://download.pytorch.org/whl/cu126 -t cuju:0.2.0 .
 ```
 
 The image needs only the NVIDIA driver on the host, since the libraries link the CUDA runtime
@@ -303,17 +303,17 @@ published image keeps or offers under the terms in the License section of the
 the tests.
 
 ```sh
-docker run --rm --gpus all cuju:0.1.0 python -m pytest -p no:cacheprovider /usr/share/cuju/tests
+docker run --rm --gpus all cuju:0.2.0 python -m pytest -p no:cacheprovider /usr/share/cuju/tests
 ```
 
 ## Apptainer image
 
 The repository's `apptainer.def` makes an Apptainer image from the image that the `Dockerfile`
 builds, for clusters that run Apptainer, version 1.2 or later. By default it takes the image
-`cuju:0.1.0` from the local Docker daemon, so the Docker image is built first with that tag.
+`cuju:0.2.0` from the local Docker daemon, so the Docker image is built first with that tag.
 
 ```sh
-docker build -t cuju:0.1.0 .
+docker build -t cuju:0.2.0 .
 apptainer build cuju.sif apptainer.def
 ```
 
@@ -322,7 +322,7 @@ and `IMAGE`, so a cluster without Docker builds from an image that another machi
 
 ```sh
 apptainer build --build-arg BOOTSTRAP=docker \
-    --build-arg IMAGE=registry.example.org/cuju:0.1.0 cuju.sif apptainer.def
+    --build-arg IMAGE=registry.example.org/cuju:0.2.0 cuju.sif apptainer.def
 ```
 
 The image runs Python with its arguments, and `--nv` brings in the host's NVIDIA driver. Its test
