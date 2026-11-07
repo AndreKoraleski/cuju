@@ -204,7 +204,7 @@ actions of each step alone, and plays them again in a batch of one environment t
 request. The replay of a long episode takes a moment on the CPU, and the `time` of each step in the
 dump is the time of that replay rather than of the original step. The match itself is the same, bit for bit.
 
-A dump can also be checked without rendering. `python -m cuju.gfootball.replay --trace_file=<dump>`
+A dump can also be checked without rendering. `cuju replay --trace_file=<dump>`
 plays a dump's actions again from its configuration and compares every step with the dump, bit for
 bit. It prints the first difference and exits 1, or the steps found equal and exits 0.
 `cuju.gfootball.replay.check(trace_file)` returns `(steps, ended, difference)` for use in a script,
@@ -491,7 +491,7 @@ name. `cuju.dumps.read_dump(path)` reads a dump, cuju's or GRF's, without GRF or
 code from it, which makes it safe for dumps from other sources.
 
 In GRF, `ScriptHelpers().replay(path, render=False)` replays a dump of cuju bit for bit, with GRF's
-default `physics_steps_per_frame=10`, and `python -m cuju.gfootball.replay` checks one without GRF.
+default `physics_steps_per_frame=10`, and `cuju replay` checks one without GRF.
 A rendering replay drifts from the match, as rendering does, so its video can part from the match
 that the dump was written from.
 

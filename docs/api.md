@@ -300,14 +300,43 @@ importing `gfootball` registers them in GRF.
 | `cuju.players` | `Bot(batch, agent)` and `Lazy(batch, agents)`, the `bot` and `lazy` players of GRF, each with `act()`, and `Bot.reset(mask=None)` |
 | `cuju.raw` | `grf_observation(raw, environment, agent, own_players, other_players)`, `grf_observations(batch, environment, agents=None, final=False)` and `team_sizes(batch, environment, agent)`, the raw dictionaries of GRF in the types of GRF |
 | `cuju.wrappers` | `MultiAgentToSingleAgent(batch, left_players, right_players, action_set=None, stacked=False, squeeze=False)`, the wrapper of GRF for scenarios that set `control_all_players` |
-| `cuju.kaggle` | `players_raw(batch, environment, agent, final=False)`, `observation(batch, environment, agent, step=0, final=False)`, `KaggleAgent(function, batch, agent, configuration=None)` and `evaluate(left, right=None, episodes=1, scenario='11_vs_11_kaggle', seed=0, device='cpu', threads=0, configuration=None)`, the observations and agents of Kaggle, and matches of Kaggle agents, each the first episode of its environment, as Kaggle plays them |
+| `cuju.kaggle` | `players_raw(batch, environment, agent, final=False)`, `observation(batch, environment, agent, step=0, final=False)`, `KaggleAgent(function, batch, agent, configuration=None, agents=None)` and `evaluate(left, right=None, episodes=1, scenario='11_vs_11_kaggle', seed=0, device='cpu', threads=0, configuration=None)`, the observations and agents of Kaggle, and matches of Kaggle agents, each the first episode of its environment, as Kaggle plays them |
 | `cuju.gfootball` | the import paths of GRF, `env` with `create_environment`, `config.Config`, `football_env.FootballEnv`, `football_action_set`, `observation_preprocessing`, `scenario_builder`, `wrappers`, `player_base`, `players`, `script_helpers`, and `replay`, `dump_to_txt` and `scenarios`, so that GRF code runs with its imports switched. Described in [Migrating from GRF](migrating-from-grf.md) |
-| `cuju.check` | `python -m cuju.check [--long] [--device all\|cpu\|cuda] [--case NAME] [--list]` |
+| `cuju.check` | `cuju check`, with `[--long] [--device all\|cpu\|cuda] [--case NAME] [--list]` |
+| `cuju.state` | `layout()`, every field of the match in memory by path, `gather(state, fields, frame='rest')`, the bytes of chosen fields of a state, `read(state, fields, frame='rest')`, the same as numpy arrays, `Field` and `FRAMES`. Described in [States](states.md#reading-fields) |
+| `cuju.render` | `Recorder(batch, environment=0, title=None, teams=None, scenario=None)` with `capture(done=None)`, `save()` and `saved`, `watch(batch, environment=0, title=None, teams=None, backlog=False)` and `LiveSource`, `add_team(folder, name=None, format='11v11')`, `play(left, right, scenario='11_vs_11_kaggle', seed=None, title=None, device='cpu', ability=(None, None))`, `serve(port=8780, open_browser=False)` and `home()`, and the command `cuju render [serve\|team\|play\|sample]`, also `python -m cuju.render`. Described in [Rendering](rendering.md) |
+
+`Recorder.capture(done)` saves an episode when it ends, and `Recorder.save()` saves the frames
+captured so far. Both return a path or `None`. `LiveSource.close()` withdraws a source, and
+`watch` replaces any source already attached to that batch. `home()` returns the renderer folder.
+
+`play` runs a requested match and returns its recording path. Each team's saved control settings
+choose the count, dynamic or fixed assignment, indices or roles, goalkeeper and action set.
+The scenario may be bundled or one of the six renderer GRF MARL scenarios. Each entry of `ability`
+sets GRF's team difficulty from 0 to 1, with `None` keeping that side's scenario value.
+The browser also provides Play a game with keyboard and controller input, described in
+[Rendering](rendering.md#playing-a-game).
+
+## Command line
+
+The package installs the command `cuju`, which `python -m cuju` also runs, with one subcommand per
+tool. `cuju render` runs the renderer, `cuju check` the self-check, and `cuju replay` and
+`cuju dump-to-txt` GRF's scripts for dumps, each with the arguments of its module, which
+`python -m` also runs. `cuju help` lists the subcommands, `cuju help NAME` describes one, and
+`cuju --version` prints the version. Each subcommand is an entry of `cuju.__main__.COMMANDS`, a
+module whose `main(arguments)` parses the rest of the command line, so a later tool joins the
+command as one more entry.
+
+```sh
+cuju help
+cuju render serve --open
+cuju check --device cpu
+```
 
 ## Environment variables
 
 The library variables select a rebuilt library without reinstalling the package, and the others
-control logging, caching and NUMA placement. All of them leave the outputs unchanged.
+control logging, caching, NUMA placement and the renderer. All of them leave the outputs unchanged.
 
 | Variable | Meaning |
 | --- | --- |
@@ -316,6 +345,9 @@ control logging, caching and NUMA placement. All of them leave the outputs uncha
 | `CUJU_LOG` | `1` logs one line per batch created, through the logger `cuju` |
 | `CUJU_BUNDLE_CACHE` | `1` or a directory, to cache the bundles built from scenario files |
 | `CUJU_NUMA_NODES` | the NUMA node of each processor, for `numa=True` |
+| `CUJU_RENDER` | `on`, or the index of an environment, gives every batch a live source for the renderer, and an empty value, `off`, `false` or `no` none, with an index past a batch's count taken as 0 |
+| `CUJU_RENDER_BACKLOG` | any value but an empty one, `0`, `off` or `no` makes every live source read every step, so that a viewer starts with 10 seconds of history |
+| `CUJU_RENDER_HOME` | the folder of the renderer's recordings, teams and live sources, `~/.cuju/render` by default |
 
 ## C API
 
@@ -342,6 +374,13 @@ without waiting unless asked to synchronize, `reset_done` never waits, and `rese
 `cuju_configuration` names the layout of the structure, and `cuju_environment_create` refuses a
 configuration whose version differs from the `CUJU_CONFIGURATION_VERSION` of the library, which is
 2 in cuju 0.1.0.
+
+Three calls read the state format without a batch. `cuju_state_layout(&size)` returns the layout
+of the match in memory as text, one field per line with its path, offset, size and type.
+`cuju_state_gather(bytes, size, frame, offsets, sizes, count, out)` loads a match, the bytes of a
+state after its pickle length and pickle, and copies the chosen fields into `out`, in the rest frame
+for `frame` 0 or the frame of the pitch for 1. `cuju_state_padding(bytes, size, mask)` marks the
+bytes of a match that GRF leaves uninitialized, so two states compare without them.
 
 Four further calls serve memory planning and debugging.
 `cuju_memory_estimate(&configuration, &bytes)` writes the bytes that `cuju_environment_create`

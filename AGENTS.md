@@ -11,7 +11,7 @@ Part one is for projects that use cuju. Part two is for changes to cuju itself.
 
 ```sh
 pip install cuju           # brings PyTorch along when it is missing
-python -m cuju.check       # ends with PASSED when the machine plays GRF's matches
+cuju check                 # ends with PASSED when the machine plays GRF's matches
 ```
 
 `pip install cuju` works directly on Linux on x86-64 and on Arm, Windows, macOS and WSL2. The CPU
@@ -20,7 +20,7 @@ x86-64, Windows and WSL2. PyPI's default PyTorch is a CUDA build on Linux and CP
 and macOS. Install PyTorch first from the index of pytorch.org only to pick another build, such as
 another CUDA version or a CUDA build for Windows. Intel macOS takes PyTorch 2.2, where
 `torch.compile` breaks the graph at each step, since the operators need PyTorch 2.4. Run
-`python -m cuju.check` after installing and before trusting results on a new machine.
+`cuju check` after installing and before trusting results on a new machine.
 
 ### The batch
 
@@ -81,6 +81,7 @@ speed.
 - [docs/index.md](docs/index.md), the start of the documentation.
 - [docs/api.md](docs/api.md), every public name.
 - [docs/migrating-from-grf.md](docs/migrating-from-grf.md), every GRF name and its counterpart.
+- [docs/rendering.md](docs/rendering.md), the renderer, `cuju render`, its recordings and teams.
 - [docs/recipes.md](docs/recipes.md), [docs/backends.md](docs/backends.md) and
     [docs/performance.md](docs/performance.md), speed on each device.
 - [examples/](examples), runnable scripts and the quickstart notebook.
@@ -117,7 +118,8 @@ sources, and `python/cuju/` the package.
 In `python/cuju/`, `__init__.py` exports the public names and each public module sits at the top.
 `_batch/` holds the implementation of `BatchEnvironment`, from loading the library to the pickles of
 a state. `gfootball/` stands in for GRF's package, and `data/` holds the bundles, the animations and
-the digests.
+the digests. `state.py` reads single fields of a state, `render/` holds the renderer, with its page
+in `render/web/`, and `__main__.py` is the command `cuju`, one entry per subcommand.
 
 ### Build and test
 
@@ -125,7 +127,7 @@ the digests.
 pip install .                                  # both libraries where nvcc is found
 CMAKE_ARGS=-DCUJU_CUDA=OFF pip install .       # the CPU library alone
 pytest tests/                                  # the public suite, a couple of minutes
-python -m cuju.check                           # the shipped self-check
+cuju check                                     # the shipped self-check
 ruff check && ruff format --check              # Python
 clang-format-18 --dry-run -Werror <files>      # C++ and CUDA
 ```
@@ -147,6 +149,8 @@ clang-format-18 --dry-run -Werror <files>      # C++ and CUDA
 - `python/cuju/data/`, the animations, the bundles, the digests and their checksums.
 - `include/cuju/libm/`, LGPL ports of glibc, and `LICENSE`, `NOTICE`, `LICENSES/`.
 - The floating-point guards in `CMakeLists.txt` and `include/cuju/floating_point.h`.
+- The montage, its teaser and its poster in `docs/assets/` and its copy in `render/web/assets/`,
+    fixed assets that `ci/render_promo.py` rebuilds only when run by hand. CI never runs it.
 - The C API's layout. Append fields of `cuju_configuration` only, raise
     `CUJU_CONFIGURATION_VERSION` with each addition, and start each new function on its own line in
     `src/*_api.h`.

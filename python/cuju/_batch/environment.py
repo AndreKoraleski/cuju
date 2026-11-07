@@ -253,6 +253,9 @@ class BatchEnvironment:
         ((1024, 4), (1024,))
     """
 
+    # The live source of `CUJU_RENDER`, or `None`, which every batch has until its constructor ends.
+    _live = None
+
     def __init__(
         self,
         assets: str | list[str],
@@ -433,6 +436,8 @@ class BatchEnvironment:
         # What the views of the buffers keep alive, without the batch.
         self._native = _Native(self._library, self._torch_device)
         requested = [assets] if isinstance(assets, str) or callable(assets) else list(assets)
+        # The renderer names the scenario of its recordings from what the batch was created with.
+        self._requested = requested
         resolved = [_resolve_asset(asset) for asset in requested]
         paths = [path for path, _ in resolved]
         if animations is None:
@@ -684,6 +689,26 @@ class BatchEnvironment:
             except BaseException:
                 self.close()
                 raise
+        if os.environ.get('CUJU_RENDER'):
+            # Rendering reads states and never writes one, so every output stays as it is.
+            from ..render import _live
+
+            try:
+                self._live = _live.from_environment(self, requested)
+            except Exception as error:
+                _live.disable(self, error)
+
+    def _show(self, done):
+        """Hands a step to the live source, which a failure turns off rather than the step."""
+        # A captured CUDA graph replays without Python, so a step under capture is not shown.
+        if self.device == 'cuda' and torch.cuda.is_current_stream_capturing():
+            return
+        try:
+            self._live.after_step(done)
+        except Exception as error:
+            from ..render import _live
+
+            _live.disable(self, error)
 
     def _output_ranges(self):
         """Returns the address and the size in bytes of every output buffer of the batch."""
@@ -715,6 +740,9 @@ class BatchEnvironment:
         every later call on the batch raises `ClosedError`, a `RuntimeError`. A batch dropped
         without `close` frees them once no tensor that it returned remains.
         """
+        live, self._live = self._live, None
+        if live is not None:
+            live.close()
         native = getattr(self, '_native', None)
         if native is not None:
             native.free()
@@ -1193,6 +1221,8 @@ class BatchEnvironment:
         self._check(status)
         self._wait_in_debug()
         observation, reward, done, final = self._outputs()
+        if self._live is not None:
+            self._show(done)
         if self._score_reward is None:
             self._score_reward = self._buffer(
                 'score_reward', (self.environment_count,), torch.int32
@@ -1318,6 +1348,8 @@ class BatchEnvironment:
         self._step_in_flight = False
         self._check(self._library.cuju_environment_step_wait(self._handle()))
         observation, reward, done, final = self._outputs()
+        if self._live is not None:
+            self._show(done)
         return (
             observation,
             reward,
@@ -1354,6 +1386,14 @@ class BatchEnvironment:
         """
         index = self._environment_index(index)
         self._check_stack(stacked)
+        return self._state(index, stacked)
+
+    def _state(self, index, stacked=False):
+        """Returns the state of a valid environment index, with the stack only when `stacked`.
+
+        The renderer reads states through this, so a batch that stacks its observations shows as
+        well, since a match needs no stack.
+        """
         episode = (ctypes.c_int * (3 + _MAXIMUM_AGENTS))()
         size = ctypes.c_ulonglong()
         self._wait_for_device()

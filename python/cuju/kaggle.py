@@ -108,6 +108,22 @@ def _action(value, count):
         if len(value) != 1:
             raise ValueError(f'expected one action for the one controlled player, found {value!r}')
         value = value[0]
+    return _index(value, count)
+
+
+def _actions(value, count, players):
+    """Returns the action indices of an answer for `players` controlled players, one each."""
+    if isinstance(value, np.ndarray):
+        value = value.reshape(-1).tolist()
+    if not isinstance(value, (list, tuple)) or len(value) != players:
+        raise ValueError(
+            f'expected one action for each of the {players} controlled players, found {value!r}'
+        )
+    return [_index(item, count) for item in value]
+
+
+def _index(value, count):
+    """Returns one action index, from an integer, a one-element array or an enum."""
     if isinstance(value, np.ndarray) and value.size == 1:
         value = value.item()
     # Kaggle: the `Action` enum of the football helpers holds the index as its value.
@@ -122,21 +138,31 @@ def _action(value, count):
 
 
 class KaggleAgent:
-    """Runs a Kaggle agent function as one agent of every environment of a batch.
+    """Runs a Kaggle agent function as one agent, or several, of every environment of a batch.
 
     Each call of `act` builds the Kaggle observation of the agent in every environment from the
     batch's current raw observation, calls the function once per environment, and returns the
     actions. It counts Kaggle's `step` per environment from the first observation of each episode.
 
+    A function that controls several players receives Kaggle's multi-agent form, one raw
+    observation per controlled player in `obs['players_raw']`, in the order of `agents`, with
+    `controlled_players` their count, and returns one action per player in the same order.
+
     Attributes:
         function: The agent function.
         batch: The batch.
-        agent: The agent that the function plays.
+        agent: The first agent that the function plays.
+        agents: Every agent that the function plays, `[agent]` for one.
         configuration: What a function that takes two arguments receives second.
     """
 
     def __init__(
-        self, function: Any, batch: Any, agent: int, configuration: dict[str, Any] | None = None
+        self,
+        function: Any,
+        batch: Any,
+        agent: int,
+        configuration: dict[str, Any] | None = None,
+        agents: list[int] | None = None,
     ) -> None:
         """Binds a Kaggle agent function to an agent of a batch.
 
@@ -147,17 +173,25 @@ class KaggleAgent:
             agent: The index of the agent, which must exist in every environment.
             configuration: The configuration of Kaggle's environment that the function reads, if
                 any, as a dictionary, and `None` passes an empty one.
+            agents: The agents of a function that controls several players, in the order of its
+                observations and actions, or `None` for `agent` alone. With a list, `act` returns
+                one column per agent.
 
         Raises:
-            ValueError: If the batch has no raw arrays or the agent is missing somewhere.
+            ValueError: If the batch has no raw arrays or an agent is missing somewhere.
         """
         if getattr(batch, '_raw_fields', None) is None:
             raise ValueError('expected a batch with the raw representation or with_raw=True')
-        if not 0 <= agent < batch.agents or not bool(batch.agent_mask[:, agent].all()):
-            raise ValueError(f'expected an agent of every environment, found {agent}')
+        self.agents = [agent] if agents is None else [int(index) for index in agents]
+        if not self.agents or len(set(self.agents)) != len(self.agents):
+            raise ValueError(f'expected distinct agents, found {agents!r}')
+        for index in self.agents:
+            if not 0 <= index < batch.agents or not bool(batch.agent_mask[:, index].all()):
+                raise ValueError(f'expected an agent of every environment, found {index}')
+        self._several = agents is not None
         self.function = function
         self.batch = batch
-        self.agent = agent
+        self.agent = self.agents[0]
         self.configuration = _Struct(configuration or {})
         self._two_arguments = _accepts_configuration(function)
         self._steps = [0] * batch.environment_count
@@ -170,6 +204,8 @@ class KaggleAgent:
 
     def act(self, done: Any = None, skip: Any = None) -> torch.Tensor:
         """Returns the agent's actions, `[environment_count]` `int32` indices on the batch's device.
+
+        A function given a list of `agents` returns `[environment_count, len(agents)]`.
 
         Args:
             done: The done flags of the step before, where an automatic reset started a new
@@ -187,16 +223,22 @@ class KaggleAgent:
         # One copy of the raw arrays to the host serves every environment.
         raw = {name: tensor.cpu() for name, tensor in self.batch.raw().items()}
         actions = []
+        players = len(self.agents)
         for environment in range(self.batch.environment_count):
             if skip is not None and bool(skip[environment]):
-                actions.append(0)
+                actions.append([0] * players if self._several else 0)
                 continue
-            entry = grf_observation(
-                raw, environment, self.agent, *team_sizes(self.batch, environment, self.agent)
-            )
+            entries = [
+                _lists(
+                    grf_observation(
+                        raw, environment, agent, *team_sizes(self.batch, environment, agent)
+                    )
+                )
+                for agent in self.agents
+            ]
             obs = _Struct(
-                players_raw=[_lists(entry)],
-                controlled_players=1,
+                players_raw=entries,
+                controlled_players=players,
                 step=self._steps[environment],
                 remainingOverageTime=_OVERAGE_TIME,
             )
@@ -205,7 +247,10 @@ class KaggleAgent:
                 if self._two_arguments
                 else self.function(obs)
             )
-            actions.append(_action(answer, self.batch.action_count))
+            if self._several:
+                actions.append(_actions(answer, self.batch.action_count, players))
+            else:
+                actions.append(_action(answer, self.batch.action_count))
             self._steps[environment] += 1
         return torch.tensor(actions, dtype=torch.int32, device=self.batch._torch_device)
 

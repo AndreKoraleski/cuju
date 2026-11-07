@@ -8,7 +8,7 @@ threads.
 
 The claim rests on code that performs GRF's floating-point operations in GRF's order, on ports of
 glibc's math functions, and on internal testing. Two public tools check it on any machine,
-`python -m cuju.check`, which compares a build with the digests of its release, and
+`cuju check`, which compares a build with the digests of its release, and
 `examples/compare_with_grf.py`, which plays cuju next to a GRF installation. Issues reporting a
 difference are welcome, and a reproduced difference is treated as a bug.
 
@@ -58,7 +58,7 @@ out each stoppage and its first rendered reset draws one more random number, so 
 for the reasons given above.
 
 The wheel carries machine code for the GPU architectures it was checked on. Another GPU runs a
-source build, which `python -m cuju.check --long` checks.
+source build, which `cuju check --long` checks.
 
 The checkpoint reward of `rewards='scoring,checkpoints'` depends on the numpy beneath GRF, since
 GRF adds it with numpy, and numpy 2 changed how a Python float combines with a `float32`. The
@@ -138,7 +138,7 @@ from the self-check to a full comparison with GRF.
 
 ### Self-check
 
-After any install, the check is `python -m cuju.check`. It ships in the wheel and needs only
+After any install, the check is `cuju check`. It ships in the wheel and needs only
 PyTorch. It prints the versions, the processor and its flags, the CPU quota, each library with its
 SHA-256, the GPU code that the CUDA library holds and every GPU with the code it runs. It then
 checks the shipped bundles and animations against `data/SHA256SUMS`, plays the digest cases on the
@@ -146,10 +146,10 @@ CPU and on every visible GPU, and prints `PASSED` or `FAILED`. Its exit status i
 that ran matched, and 1 otherwise. Four forms of the command cover the usual cases.
 
 ```sh
-python -m cuju.check                  # every short case, the CPU and every GPU
-python -m cuju.check --device cuda    # one backend, which must then be present
-python -m cuju.check --long           # also whole matches, several minutes on the CPU
-python -m cuju.check --list           # the diagnostics and the cases, without playing
+cuju check                # every short case, the CPU and every GPU
+cuju check --device cuda  # one backend, which must then be present
+cuju check --long         # also whole matches, several minutes on the CPU
+cuju check --list         # the diagnostics and the cases, without playing
 ```
 
 A failing digest means that the compiler, the flags or the GPU changed the results, and that build
@@ -215,7 +215,7 @@ of steps into a run, and its cause is found most directly from one step before i
 the last step where the two engines agree carries the most information. A report of a difference is
 most useful with seven items.
 
-- The whole output of `python -m cuju.check`, which names the versions, the device, the libraries
+- The whole output of `cuju check`, which names the versions, the device, the libraries
     and their SHA-256, and whether the build reproduces the digests.
 - The library, the wheel's or a source build with its compiler and flags.
 - The call that created the batch, with every option.

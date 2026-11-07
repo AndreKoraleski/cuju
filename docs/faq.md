@@ -98,7 +98,7 @@ teams keep their ends, so every observation keeps its orientation through half t
 
 ### Diagnostics
 
-`python -m cuju.check` reports the versions, processor, libraries and GPUs of an installation and
+`cuju check` reports the versions, processor, libraries and GPUs of an installation and
 checks that the build plays the matches of GRF. Its output belongs in every issue report.
 
 ### Illegal instruction and AVX2 errors
@@ -196,7 +196,15 @@ the player of one agent to the built-in AI for a step, which produces other matc
 
 ### Rendering and video
 
-Videos of cuju matches are produced with the tools of GRF. `cuju.dumps.DumpWriter` writes a match as
+Matches of cuju are watched in a browser with `cuju render`, saved or live, as described in
+[Rendering](rendering.md), and watching preserves every output. The Home page leads to the live
+sources and recent recordings. Matches requests games between registered submissions, including
+teams that control several players, and Play a game lets one or two people play with a keyboard
+or controllers. Ability sets the strength of the built in AI on each side, including teammates
+that it plays for a submission or a person. A `.cjr` file opens in the browser viewer.
+
+Videos of cuju matches are produced with
+the tools of GRF. `cuju.dumps.DumpWriter` writes a match as
 a GRF dump, and the `dump_to_video` of GRF turns the dump into a video. A state can also be loaded
 into a GRF with rendering, which plays differently from the moment it renders.
 

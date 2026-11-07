@@ -9,7 +9,7 @@ dynamic = ["version"]
 description = "A bit-exact, batched reimplementation of Google Research Football, for CUDA and CPU"
 readme = "README.md"
 requires-python = ">=3.10"
-license = "Apache-2.0 AND LGPL-2.1-or-later AND MIT AND SunPro AND BSL-1.0 AND BSD-3-Clause"
+license = "Apache-2.0 AND LGPL-2.1-or-later AND MIT AND SunPro AND BSL-1.0 AND BSD-3-Clause AND CC0-1.0 AND Unlicense AND CC-BY-4.0"
 license-files = ["LICENSE", "NOTICE", "LICENSES/*"]
 authors = [{ name = "André Koraleski" }]
 keywords = [
@@ -41,6 +41,9 @@ dependencies = [
     "numpy<2; sys_platform == 'darwin' and platform_machine == 'x86_64'",
 ]
 
+[project.scripts]
+cuju = "cuju.__main__:main"
+
 [project.urls]
 Homepage = "https://github.com/AndreKoraleski/cuju"
 Documentation = "https://github.com/AndreKoraleski/cuju/tree/main/docs"
@@ -50,6 +53,8 @@ Changelog = "https://github.com/AndreKoraleski/cuju/blob/main/CHANGELOG.md"
 [project.optional-dependencies]
 spaces = ["gymnasium>=0.29"]
 test = ["pytest>=8"]
+# The renderer needs nothing beyond cuju's own dependencies, so the extra names it and adds nothing.
+render = []
 
 [tool.scikit-build]
 minimum-version = "build-system.requires"
@@ -60,7 +65,7 @@ wheel.packages = ["python/cuju"]
 # Python 3.
 wheel.py-api = "py3"
 build-dir = "build/{wheel_tag}"
-# The images of the docs are CC BY 4.0 and not source, so the sdist leaves them out.
+# The images and videos of the docs are CC BY 4.0 and not source, so the sdist leaves them out.
 sdist.exclude = ["docs/assets"]
 
 [tool.scikit-build.metadata.version]

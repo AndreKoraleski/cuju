@@ -1,0 +1,523 @@
+{
+    "music_peak": -8.0,
+    "music_fade": 1.2,
+    "music_loop": 57.6,
+    "tempo": 124.99,
+    "video_kbps": 5700,
+    "web_kbps": 1450,
+    "web_fps": 30,
+    "poster": {
+        "scene": "goal",
+        "at": 3.0
+    },
+    "teaser": {
+        "width": 960,
+        "fps": 15,
+        "quality": 70,
+        "shots": [
+            [
+                "goal",
+                2.0,
+                1.8
+            ],
+            [
+                "beach",
+                0.8,
+                1.0
+            ],
+            [
+                "space",
+                0.8,
+                1.0
+            ],
+            [
+                "custom",
+                1.0,
+                1.0
+            ],
+            [
+                "podium",
+                0.8,
+                1.0
+            ],
+            [
+                "grid",
+                6.0,
+                1.4
+            ]
+        ]
+    },
+    "scenes": [
+        {
+            "name": "goal",
+            "seconds": 3.8333333333333335,
+            "field": {
+                "preset": "Floodlit night"
+            },
+            "setup": "await promo.open(\"Promo 11 1\", 18.9); cuju.setCamera('broadcast'); await promo.names([['Okafor', 'Silva', 'Brandt', 'Moreau', 'Kato', 'Ruiz', 'Larsen', 'Mensah', 'Costa', 'Novak', 'Haddad'], ['Ito', 'Weber', 'Diaz', 'Kowal', 'Nunes', 'Park', 'Ross', 'Adeyemi', 'Varga', 'Lind', 'Sato']]);",
+            "pre": 0.2,
+            "wipe_out": true,
+            "wipe_out_label": "Replay"
+        },
+        {
+            "name": "replay",
+            "seconds": 3.85,
+            "field": {
+                "preset": "Floodlit night"
+            },
+            "setup": "await promo.open(\"Promo 11 1\", 18.4); cuju.setCamera('broadcast'); await promo.names([['Okafor', 'Silva', 'Brandt', 'Moreau', 'Kato', 'Ruiz', 'Larsen', 'Mensah', 'Costa', 'Novak', 'Haddad'], ['Ito', 'Weber', 'Diaz', 'Kowal', 'Nunes', 'Park', 'Ross', 'Adeyemi', 'Varga', 'Lind', 'Sato']]); const d = cuju.director; const play = d.play.bind(d); d.play = (q, o) => play(q.map((x) => ({ ...x, shot: x.shot === 'auto' ? 'reverse' : x.shot })), o);",
+            "until": "!document.getElementById('replay-badge').hidden",
+            "lead": -2.0,
+            "wipe_in": true,
+            "wipe_label": "Replay",
+            "wipe_out": true
+        },
+        {
+            "name": "title",
+            "seconds": 1.9166666666666667,
+            "wipe_in": true,
+            "setup": "promo.logo('Google Research Football, bit-exact and batched', 'Rendered in the browser');"
+        },
+        {
+            "name": "beach",
+            "seconds": 1.9166666666666667,
+            "field": {
+                "preset": "Beach at sunset"
+            },
+            "setup": "await promo.open(\"Promo 11 3\", 60);cuju.cameras.flyTo(cuju.cameras.freePos.clone().set(-16, 3, -18), cuju.cameras.freePos.clone().set(0, 2.5, -48), 55, 0.05);",
+            "pre": 0.2,
+            "events": [
+                {
+                    "at": 0,
+                    "js": "cuju.cameras.flyTo(cuju.cameras.freePos.clone().set(8, 3.5, -21), cuju.cameras.freePos.clone().set(0, 2.5, -48), 55, 3.0);"
+                },
+                {
+                    "at": 0.3,
+                    "js": "promo.third(\"Beach\", \"Arena\", \"\")"
+                }
+            ]
+        },
+        {
+            "name": "space",
+            "seconds": 1.9166666666666667,
+            "field": {
+                "preset": "In orbit"
+            },
+            "setup": "await promo.open(\"Promo 11 5\", 100);cuju.cameras.flyTo(cuju.cameras.freePos.clone().set(-12, 3, 30), cuju.cameras.freePos.clone().set(0, 22, -60), 55, 0.05);",
+            "pre": 0.2,
+            "events": [
+                {
+                    "at": 0,
+                    "js": "cuju.cameras.flyTo(cuju.cameras.freePos.clone().set(12, 3, 30), cuju.cameras.freePos.clone().set(0, 22, -60), 55, 3.0);"
+                },
+                {
+                    "at": 0.3,
+                    "js": "promo.third(\"Space station\", \"Arena\", \"\")"
+                }
+            ]
+        },
+        {
+            "name": "neon",
+            "seconds": 1.9333333333333333,
+            "field": {
+                "preset": "Summer afternoon",
+                "arena": "neon",
+                "time": 21
+            },
+            "setup": "await promo.open(\"Promo 11 6\", 120);cuju.cameras.flyTo(cuju.cameras.freePos.clone().set(-30, 3, 30), cuju.cameras.freePos.clone().set(0, 6, -60), 55, 0.05);",
+            "pre": 0.2,
+            "events": [
+                {
+                    "at": 0,
+                    "js": "cuju.cameras.flyTo(cuju.cameras.freePos.clone().set(4, 3, 30), cuju.cameras.freePos.clone().set(0, 6, -60), 55, 3.0);"
+                },
+                {
+                    "at": 0.3,
+                    "js": "promo.third(\"Neon arcade\", \"Arena\", \"\")"
+                }
+            ]
+        },
+        {
+            "name": "rain",
+            "seconds": 1.9166666666666667,
+            "field": {
+                "preset": "Rainy night"
+            },
+            "setup": "await promo.open(\"Promo 11 7\", 140); cuju.setCamera('broadcast');",
+            "pre": 4.0,
+            "events": [
+                {
+                    "at": 0.1,
+                    "js": "promo.third(\"Rain\", \"Weather\", \"\")"
+                }
+            ]
+        },
+        {
+            "name": "kaykit",
+            "seconds": 1.9166666666666667,
+            "field": {
+                "preset": "Autumn dusk"
+            },
+            "setup": "await promo.open(\"Promo 11 2\", 70); cuju.setCamera('broadcast'); await promo.styles([{ style: { model: 'kaykit-skeleton-warrior' } }, { style: { model: 'kaykit-knight' } }]); cuju.firstPerson(0, 9); cuju.cameras.playerView = 2;",
+            "pre": 0.8,
+            "events": [
+                {
+                    "at": 0,
+                    "js": "document.getElementById('follow-label').style.visibility = 'hidden';"
+                },
+                {
+                    "at": 0.1,
+                    "js": "promo.third(\"Skeletons and knights\", \"KayKit models in team kits\", \"\")"
+                }
+            ]
+        },
+        {
+            "name": "editor",
+            "seconds": 2.8833333333333333,
+            "page": "teams",
+            "settle": 1.5,
+            "setup": "await promo.editor('Lanterns', 'model'); cuju.editor.style.model = 'custom'; cuju.editor.invalidate('model'); cuju.editor.showSection('model');",
+            "events": [
+                {
+                    "at": 0.3,
+                    "js": "promo.third(\"Your own rigged model\", \"Team editor\", \"\")"
+                },
+                {
+                    "at": 0.8,
+                    "js": "const b = await (await fetch('assets/models/kaykit-barbarian.glb')).arrayBuffer(); cuju.editor.useModelFile(new File([b], 'lantern-striker.glb'));"
+                }
+            ],
+            "after": "cuju.editor.style.players.forEach((p, i) => { p.model = i % 2 ? 'grf' : 'team'; }); await cuju.editor.save();"
+        },
+        {
+            "name": "sponsor",
+            "seconds": 2.8833333333333333,
+            "page": "teams",
+            "settle": 1.5,
+            "setup": "await promo.editor('Lanterns', 'kit'); cuju.editor.paint('sponsor-1', 'Sponsor 1', 'sponsor'); for (let i = 0; i < 100 && !cuju.editor.painter.canvas; i++) await new Promise((r) => setTimeout(r, 50)); await new Promise((r) => setTimeout(r, 400)); cuju.editor.painter.fit(); promo.host(cuju.editor.painter.dialog);",
+            "events": [
+                {
+                    "at": 0.3,
+                    "js": "promo.third(\"Paint the boards\", \"Painter\", \"\")"
+                },
+                {
+                    "at": 0.6,
+                    "js": "const p = cuju.editor.painter; p.color = '#ff6f00'; p.addShape('rect'); p.canvas.getActiveObject().set({ width: 1024, height: 128 }); p.canvas.discardActiveObject(); p.canvas.requestRenderAll(); p.dialog.querySelector('.painter-canvas').scrollTop = 0;"
+                },
+                {
+                    "at": 1.1,
+                    "js": "const p = cuju.editor.painter; p.color = '#202124'; p.addText(); p.canvas.getActiveObject().set({ text: 'L', fontSize: 86 }); p.canvas.requestRenderAll(); p.dialog.querySelector('.painter-canvas').scrollTop = 0;"
+                },
+                {
+                    "at": 1.19,
+                    "js": "const p = cuju.editor.painter; p.canvas.getActiveObject().set({ text: \"LA\" }); p.canvas.requestRenderAll(); p.dialog.querySelector('.painter-canvas').scrollTop = 0;"
+                },
+                {
+                    "at": 1.28,
+                    "js": "const p = cuju.editor.painter; p.canvas.getActiveObject().set({ text: \"LAN\" }); p.canvas.requestRenderAll(); p.dialog.querySelector('.painter-canvas').scrollTop = 0;"
+                },
+                {
+                    "at": 1.37,
+                    "js": "const p = cuju.editor.painter; p.canvas.getActiveObject().set({ text: \"LANT\" }); p.canvas.requestRenderAll(); p.dialog.querySelector('.painter-canvas').scrollTop = 0;"
+                },
+                {
+                    "at": 1.46,
+                    "js": "const p = cuju.editor.painter; p.canvas.getActiveObject().set({ text: \"LANTE\" }); p.canvas.requestRenderAll(); p.dialog.querySelector('.painter-canvas').scrollTop = 0;"
+                },
+                {
+                    "at": 1.55,
+                    "js": "const p = cuju.editor.painter; p.canvas.getActiveObject().set({ text: \"LANTER\" }); p.canvas.requestRenderAll(); p.dialog.querySelector('.painter-canvas').scrollTop = 0;"
+                },
+                {
+                    "at": 1.64,
+                    "js": "const p = cuju.editor.painter; p.canvas.getActiveObject().set({ text: \"LANTERN\" }); p.canvas.requestRenderAll(); p.dialog.querySelector('.painter-canvas').scrollTop = 0;"
+                },
+                {
+                    "at": 1.73,
+                    "js": "const p = cuju.editor.painter; p.canvas.getActiveObject().set({ text: \"LANTERN \" }); p.canvas.requestRenderAll(); p.dialog.querySelector('.painter-canvas').scrollTop = 0;"
+                },
+                {
+                    "at": 1.82,
+                    "js": "const p = cuju.editor.painter; p.canvas.getActiveObject().set({ text: \"LANTERN A\" }); p.canvas.requestRenderAll(); p.dialog.querySelector('.painter-canvas').scrollTop = 0;"
+                },
+                {
+                    "at": 1.91,
+                    "js": "const p = cuju.editor.painter; p.canvas.getActiveObject().set({ text: \"LANTERN AI\" }); p.canvas.requestRenderAll(); p.dialog.querySelector('.painter-canvas').scrollTop = 0;"
+                },
+                {
+                    "at": 2.0,
+                    "js": "const p = cuju.editor.painter; p.canvas.getActiveObject().set({ text: \"LANTERN AIR\" }); p.canvas.requestRenderAll(); p.dialog.querySelector('.painter-canvas').scrollTop = 0;"
+                },
+                {
+                    "at": 2.4,
+                    "js": "const p = cuju.editor.painter; p.canvas.discardActiveObject(); p.canvas.requestRenderAll(); p.dialog.querySelector('.painter-canvas').scrollTop = 0;"
+                }
+            ],
+            "after": "await cuju.editor.painter.save();"
+        },
+        {
+            "name": "custom",
+            "seconds": 1.9166666666666667,
+            "field": {
+                "preset": "Summer afternoon"
+            },
+            "setup": "await promo.open(\"Promo 11 1\", 95); cuju.setCamera('lowside'); const t = await promo.team('Lanterns'); await promo.styles([{ id: t.id }, null]);",
+            "pre": 1.0,
+            "events": [
+                {
+                    "at": 0.3,
+                    "js": "promo.third(\"Lanterns\", \"Own model, shirt, boards and fans\", \"\")"
+                }
+            ]
+        },
+        {
+            "name": "export",
+            "seconds": 4.8,
+            "page": "teams",
+            "settle": 1.5,
+            "setup": "await promo.editor('Lanterns', 'export');",
+            "events": [
+                {
+                    "at": 0.3,
+                    "js": "promo.zoomTo('#app a.btn.primary[download]', 2.4, 1.8);"
+                },
+                {
+                    "at": 2.3,
+                    "js": "promo.press('#app a.btn.primary[download]', true);"
+                },
+                {
+                    "at": 2.5,
+                    "js": "promo.press('#app a.btn.primary[download]', false);"
+                },
+                {
+                    "at": 2.8,
+                    "js": "promo.file('Export to submission folder', 'Lanterns.zip', [['main.py', 'the submission, as Kaggle reads it'], ['cuju-team/', 'format, style, roster, images, sponsors and model']]);"
+                }
+            ]
+        },
+        {
+            "name": "playsetup",
+            "seconds": 1.9166666666666667,
+            "page": "play",
+            "settle": 2.0,
+            "setup": "const s = cuju.play.scenarioSelect; s.value = 'academy_counterattack_easy'; s.dispatchEvent(new Event('change')); await new Promise((r) => setTimeout(r, 300)); promo.hideNumbers(document.getElementById('page-play'));",
+            "events": [
+                {
+                    "at": 0.3,
+                    "js": "promo.third(\"Play a game\", \"Scenario and side\", \"\")"
+                },
+                {
+                    "at": 2.2,
+                    "js": "promo.press(cuju.play.startButton, true);"
+                },
+                {
+                    "at": 2.4,
+                    "js": "promo.press(cuju.play.startButton, false);"
+                }
+            ]
+        },
+        {
+            "name": "play",
+            "seconds": 2.8833333333333333,
+            "page": "play",
+            "settle": 1.5,
+            "setup": "const { api } = await import('./js/api.js');\nconst sources = await api.live();\nlet entry = { id: sources[0].id, state: 'paused', score: [0, 0] };\napi.startGame = async () => entry;\napi.gameStream = (id, signal) => api.liveStream(id, signal);\napi.pauseGame = async (id, paused) => { entry = { ...entry, state: paused ? 'paused' : 'playing' }; return entry; };\napi.gameInput = async () => entry;\napi.game = async () => entry;\nawait cuju.play.start();\nfor (let i = 0; i < 100 && !cuju.play.game.started; i++) await new Promise((r) => setTimeout(r, 100));\ncuju.play.lastDevice = 'Controller';\ncuju.play.toggleCard(true);\nconst k = cuju.source.header.players.findIndex((p) => p.team === 0 && p.index === 9);\nconst mark = () => { const st = cuju.timeline.store; for (let i = Math.max(st.first, st.last - 60); i <= st.last; i++) { const f = st.get(i); if (f) f.playerFlags[k] |= 8; } };\nmark(); setInterval(() => { mark(); promo.hideNumbers(cuju.play.stage); }, 40);",
+            "pre": 1.2,
+            "events": [
+                {
+                    "at": 0.05,
+                    "js": "const pl = cuju.play; pl.activePad = () => ({ entry: { style: 'xbox' } }); pl.padTools = () => []; pl.lastDevice = 'Controller'; pl.toggleCard(true);"
+                },
+                {
+                    "at": 0.3,
+                    "js": "promo.third(\"Play a game\", \"Keyboard or controller\", \"\")"
+                }
+            ]
+        },
+        {
+            "name": "redcard",
+            "seconds": 2.8833333333333333,
+            "field": {
+                "preset": "Autumn dusk"
+            },
+            "setup": "await promo.open(\"Reds against GRF's built-in AI, synthetic sample\", 137.0); cuju.setCamera('broadcast'); await promo.names([['Okafor', 'Silva', 'Brandt', 'Moreau', 'Kato', 'Ruiz', 'Larsen', 'Mensah', 'Costa', 'Novak', 'Haddad'], ['Ito', 'Weber', 'Diaz', 'Kowal', 'Nunes', 'Park', 'Ross', 'Adeyemi', 'Varga', 'Lind', 'Sato']]); setInterval(() => { for (const e of document.querySelectorAll('.ct-name, .db-name')) { e.textContent = e.textContent.replace(/^\\d+\\s+/, ''); } }, 30);",
+            "until": "!!document.querySelector('.card-third.show')",
+            "lead": 1.2
+        },
+        {
+            "name": "offside",
+            "seconds": 2.8666666666666667,
+            "field": {
+                "preset": "Summer afternoon"
+            },
+            "setup": "await promo.open(\"Reds against GRF's built-in AI, synthetic sample\", 130.0); cuju.setCamera('broadcast'); await promo.names([['Okafor', 'Silva', 'Brandt', 'Moreau', 'Kato', 'Ruiz', 'Larsen', 'Mensah', 'Costa', 'Novak', 'Haddad'], ['Ito', 'Weber', 'Diaz', 'Kowal', 'Nunes', 'Park', 'Ross', 'Adeyemi', 'Varga', 'Lind', 'Sato']]); setInterval(() => { for (const e of document.querySelectorAll('.ct-name, .db-name')) { e.textContent = e.textContent.replace(/^\\d+\\s+/, ''); } }, 30);",
+            "until": "!!document.querySelector('.decision-banner.show')"
+        },
+        {
+            "name": "medal",
+            "seconds": 1.9333333333333333,
+            "field": {
+                "preset": "Floodlit night"
+            },
+            "setup": "await promo.open(\"Promo 11 1\", 290); cuju.setCamera('broadcast'); await promo.names([['Okafor', 'Silva', 'Brandt', 'Moreau', 'Kato', 'Ruiz', 'Larsen', 'Mensah', 'Costa', 'Novak', 'Haddad'], ['Ito', 'Weber', 'Diaz', 'Kowal', 'Nunes', 'Park', 'Ross', 'Adeyemi', 'Varga', 'Lind', 'Sato']]); cuju.settings.podium = true; cuju.postMatch.end({ home: false, restore: false }); cuju.postMatch.start(); await new Promise((r) => setTimeout(r, 300)); cuju.postMatch.step = 2; cuju.postMatch.next();",
+            "pre": 1.4
+        },
+        {
+            "name": "podium",
+            "seconds": 1.9166666666666667,
+            "field": {
+                "preset": "Floodlit night"
+            },
+            "setup": "await promo.open(\"Promo 11 1\", 290); cuju.setCamera('broadcast'); await promo.names([['Okafor', 'Silva', 'Brandt', 'Moreau', 'Kato', 'Ruiz', 'Larsen', 'Mensah', 'Costa', 'Novak', 'Haddad'], ['Ito', 'Weber', 'Diaz', 'Kowal', 'Nunes', 'Park', 'Ross', 'Adeyemi', 'Varga', 'Lind', 'Sato']]); cuju.settings.podium = true; cuju.postMatch.end({ home: false, restore: false }); cuju.postMatch.start(); await new Promise((r) => setTimeout(r, 300)); cuju.postMatch.step = 3; cuju.postMatch.next();",
+            "pre": 1.0
+        },
+        {
+            "name": "grid",
+            "kind": "grid",
+            "seconds": 7.683333333333334,
+            "line": "promo.headline('Show what you prefer, play all the same.')",
+            "line_at": 3.84,
+            "clips": [
+                "tile0",
+                "tile1",
+                "tile2",
+                "tile3",
+                "tile4",
+                "tile5"
+            ],
+            "offsets": [
+                0.0,
+                2.0,
+                4.0
+            ],
+            "keys": [
+                [
+                    0,
+                    1
+                ],
+                [
+                    0.96,
+                    1
+                ],
+                [
+                    1.44,
+                    2
+                ],
+                [
+                    1.92,
+                    2
+                ],
+                [
+                    2.4,
+                    4
+                ],
+                [
+                    2.88,
+                    8
+                ],
+                [
+                    3.36,
+                    16
+                ],
+                [
+                    3.84,
+                    32
+                ],
+                [
+                    4.32,
+                    64
+                ],
+                [
+                    5.28,
+                    128
+                ],
+                [
+                    7.68,
+                    160
+                ]
+            ]
+        },
+        {
+            "name": "exact",
+            "seconds": 3.8333333333333335,
+            "field": {
+                "preset": "Autumn dusk"
+            },
+            "setup": "await promo.open(\"Promo 11 2\", 30); cuju.setCamera('broadcast');",
+            "pre": 0.5,
+            "events": [
+                {
+                    "at": 0.4,
+                    "js": "promo.banner(\"Google Research Football, bit-exact\", \"Checked against GRF on CPU and CUDA\", false)"
+                }
+            ]
+        },
+        {
+            "name": "end",
+            "seconds": 6.72,
+            "setup": "promo.logo('github.com/AndreKoraleski/cuju', '', 'pip install cuju');"
+        },
+        {
+            "name": "tile0",
+            "tile": true,
+            "seconds": 11.5,
+            "field": {
+                "preset": "Summer afternoon"
+            },
+            "setup": "await promo.open(\"Promo 11 2\", 45); cuju.setCamera('broadcast'); document.getElementById('goal-banner').style.visibility = 'hidden';",
+            "pre": 0.3
+        },
+        {
+            "name": "tile1",
+            "tile": true,
+            "seconds": 6.0,
+            "field": {
+                "preset": "Beach at sunset"
+            },
+            "setup": "await promo.open(\"Promo 11 3\", 80); cuju.setCamera('goal'); document.getElementById('goal-banner').style.visibility = 'hidden';",
+            "pre": 0.3
+        },
+        {
+            "name": "tile2",
+            "tile": true,
+            "seconds": 6.0,
+            "field": {
+                "preset": "Floodlit night"
+            },
+            "setup": "await promo.open(\"Promo 11 7\", 75); cuju.setCamera('goal'); document.getElementById('goal-banner').style.visibility = 'hidden';",
+            "pre": 0.3
+        },
+        {
+            "name": "tile3",
+            "tile": true,
+            "seconds": 6.0,
+            "field": {
+                "preset": "In orbit"
+            },
+            "setup": "await promo.open(\"Promo 11 5\", 140); cuju.setCamera('broadcast'); document.getElementById('goal-banner').style.visibility = 'hidden';",
+            "pre": 0.3
+        },
+        {
+            "name": "tile4",
+            "tile": true,
+            "seconds": 6.0,
+            "field": {
+                "preset": "Summer afternoon",
+                "arena": "neon",
+                "time": 21
+            },
+            "setup": "await promo.open(\"Promo 11 6\", 160); cuju.setCamera('broadcast'); document.getElementById('goal-banner').style.visibility = 'hidden';",
+            "pre": 0.3
+        },
+        {
+            "name": "tile5",
+            "tile": true,
+            "seconds": 6.0,
+            "field": {
+                "preset": "Rainy night"
+            },
+            "setup": "await promo.open(\"Promo 11 8\", 100); cuju.setCamera('broadcast'); document.getElementById('goal-banner').style.visibility = 'hidden';",
+            "pre": 0.3
+        }
+    ]
+}

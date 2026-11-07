@@ -1,0 +1,23 @@
+{
+    "id": "kaykit-skeleton-rogue",
+    "name": "Skeleton Rogue",
+    "author": "Kay Lousberg, www.kaylousberg.com",
+    "source": "KayKit Character Pack Skeletons 1.1",
+    "license": "CC0 1.0",
+    "joints": {
+        "player": "root",
+        "body": "hips",
+        "middle": "chest",
+        "neck": "head",
+        "left_shoulder": "upperarm.l",
+        "left_elbow": "lowerarm.l",
+        "right_shoulder": "upperarm.r",
+        "right_elbow": "lowerarm.r",
+        "left_thigh": "upperleg.l",
+        "left_knee": "lowerleg.l",
+        "left_ankle": "foot.l",
+        "right_thigh": "upperleg.r",
+        "right_knee": "lowerleg.r",
+        "right_ankle": "foot.r"
+    }
+}

@@ -10,7 +10,7 @@ import pytest
 import cuju
 from conftest import CUDA, play_digest
 
-# The package ships the digests, for `python -m cuju.check` as well.
+# The package ships the digests, for `cuju check` as well.
 DIGESTS = os.path.join(os.path.dirname(os.path.abspath(cuju.__file__)), 'data', 'digests.json')
 with open(DIGESTS, encoding='utf-8') as handle:
     EXPECTED = json.load(handle)

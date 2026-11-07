@@ -3,7 +3,7 @@
 # The Apptainer image of cuju, made from the container image that the Dockerfile builds, for
 # Apptainer 1.2 or later, as
 #
-#     docker build -t cuju:0.1.0 .
+#     docker build -t cuju:0.2.0 .
 #     apptainer build cuju.sif apptainer.def
 #
 # An image elsewhere, such as a site's registry, comes in with the build arguments
@@ -13,7 +13,7 @@ From: {{ IMAGE }}
 
 %arguments
     BOOTSTRAP=docker-daemon
-    IMAGE=cuju:0.1.0
+    IMAGE=cuju:0.2.0
 
 %labels
     org.opencontainers.image.title cuju

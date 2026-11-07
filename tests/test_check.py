@@ -1,6 +1,6 @@
 # Copyright 2026 The cuju Authors
 # SPDX-License-Identifier: Apache-2.0
-"""Checks `python -m cuju.check`, its diagnostics, and the log of `CUJU_LOG=1`."""
+"""Checks `cuju check`, its diagnostics, and the log of `CUJU_LOG=1`."""
 
 import logging
 import os

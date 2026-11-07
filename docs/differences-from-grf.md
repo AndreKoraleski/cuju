@@ -11,7 +11,8 @@ batch accepts, and the third concerns GRF's loader of states, where cuju continu
 exactly. The interface is that of a batch of environments returning PyTorch tensors, with an
 automatic reset inside the step and with GRF's single-environment interface available as
 `cuju.env.create_environment`. cuju validates scenarios and states with named errors, keeps a
-bounded history of positions, and plays without rendering, so matches are viewed in GRF.
+bounded history of positions, and plays without rendering, so matches are viewed in cuju's own
+renderer, which reads states without changing them, or in GRF.
 
 ## Output differences
 
@@ -131,7 +132,7 @@ as the table shows.
 
 | GRF | cuju |
 | --- | --- |
-| `render`, `write_video` and the representation `pixels` | matches play without rendering, and a match is viewed by writing a dump and replaying it in GRF, or by loading a state into a GRF that renders, since a rendered GRF plays other matches than an unrendered one |
+| `render`, `write_video` and the representation `pixels` | matches play without rendering, and a match is viewed in cuju's renderer, described in [Rendering](rendering.md), which reads states and leaves the match as it is, or by writing a dump and replaying it in GRF, or by loading a state into a GRF that renders, since a rendered GRF plays other matches than an unrendered one |
 | the tracker, `tracker_setup` | stays in GRF |
 | keyboard and gamepad control and the bundled `ppo2_cnn` player | stay in GRF |
 | the `replay` player, which plays a dump's actions | `cuju.gfootball.env.players.replay`, loaded from `extra_players` as in GRF |
