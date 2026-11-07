@@ -1,0 +1,854 @@
+/*
+Copyright 2026 The cuju Authors
+SPDX-License-Identifier: Apache-2.0
+*/
+
+/* The Home page, a landing page. A wide opening band with the logo as the name over a pitch drawn
+   in thin lines, then bands that run the full width of the page, each with its content held to a
+   readable column. The tokens of style.css carry the colors, so both themes follow without rules
+   of their own. */
+
+.home {
+    min-height: 100%;
+}
+
+.home-wrap {
+    width: 100%;
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+.home-band {
+    padding: 72px 0;
+    border-top: 1px solid var(--border);
+}
+
+/* The opening band. */
+
+.home-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: clamp(460px, 64vh, 640px);
+    padding: 72px 0;
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse 60% 70% at 12% 40%, var(--glow), transparent 70%),
+        linear-gradient(var(--surface), var(--bg));
+}
+
+.home-hero-inner {
+    position: relative;
+}
+
+/* The pitch lies at the right of the band, tilted back as the broadcast camera sees it, and fades
+   out toward the words. */
+.home-pitch-frame {
+    position: absolute;
+    top: 50%;
+    right: -17%;
+    width: min(68%, 1040px);
+    aspect-ratio: 1130 / 720;
+    transform: translateY(-52%);
+    perspective: 1500px;
+    color: var(--muted);
+    pointer-events: none;
+    -webkit-mask-image: radial-gradient(ellipse 58% 62% at 58% 52%, #000 35%, transparent 100%);
+    mask-image: radial-gradient(ellipse 58% 62% at 58% 52%, #000 35%, transparent 100%);
+}
+
+.home-pitch {
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0.32;
+    transform: rotateX(50deg) rotateZ(-6deg);
+    transform-origin: 50% 60%;
+}
+
+.home-pitch path,
+.home-pitch circle {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+}
+
+.home-pitch .spot {
+    fill: currentColor;
+    stroke: none;
+}
+
+.home-pitch .ball {
+    fill: var(--accent);
+    stroke: none;
+}
+
+.home-eyebrow {
+    margin: 0 0 6px;
+    color: var(--accent-hover);
+    font-size: 15px;
+    font-variant: small-caps;
+    letter-spacing: 0.14em;
+}
+
+/* The logo is the name, so the heading holds the picture alone and reads as cuju. */
+.home-title {
+    margin: 0 0 20px;
+    line-height: 0;
+}
+
+.home-wordmark {
+    display: block;
+    width: 168px;
+    height: 168px;
+    filter: var(--logo-filter);
+}
+
+.home-tagline {
+    max-width: 21em;
+    text-wrap: balance;
+    margin: 0 0 14px;
+    font-size: 34px;
+    line-height: 1.25;
+    letter-spacing: 0.005em;
+}
+
+.home-lede {
+    max-width: 36em;
+    margin: 0 0 32px;
+    color: var(--muted);
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.home-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.home-actions .btn {
+    justify-content: center;
+    min-height: 44px;
+    padding: 8px 20px;
+    font-size: 17px;
+    font-variant: small-caps;
+    letter-spacing: 0.05em;
+}
+
+.home-actions .btn:not(.primary) {
+    background: var(--overlay);
+}
+
+.home-actions .home-cta {
+    min-width: 164px;
+    min-height: 52px;
+    padding: 10px 32px;
+    margin-right: 6px;
+    font-size: 20px;
+    letter-spacing: 0.07em;
+}
+
+/* What the server holds, in one quiet line under the actions. */
+.home-glance {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 0;
+    margin: 28px 0 0;
+    color: var(--muted);
+    font-size: 15px;
+}
+
+.home-glance-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+}
+
+.home-glance-item:first-child {
+    padding-left: 0;
+}
+
+.home-glance-item + .home-glance-item {
+    border-left: 1px solid var(--border);
+}
+
+.home-glance-item.live .home-live-dot {
+    background: var(--muted);
+    animation: none;
+}
+
+.home-glance-item.live.on {
+    color: var(--live);
+}
+
+.home-glance-item.live.on .home-live-dot {
+    background: var(--live);
+    animation: pulse 1.4s infinite;
+}
+
+.home-glance .link {
+    font-size: inherit;
+    text-underline-offset: 3px;
+}
+
+/* The heads of the bands. A short accent rule above each heading marks a band as one of the page's
+   own, and a thin rule under the heads of the lists. */
+
+.home-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin-bottom: 28px;
+}
+
+.home-head-text {
+    position: relative;
+    min-width: 0;
+    padding-top: 18px;
+}
+
+.home-head-text::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 36px;
+    height: 3px;
+    background: var(--accent);
+}
+
+.home-h2 {
+    margin: 0;
+    font-size: 30px;
+    font-weight: normal;
+    line-height: 1.2;
+}
+
+.home-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.home-more {
+    flex: none;
+    font-size: 15px;
+}
+
+.home .link:focus-visible,
+.home a:focus-visible {
+    outline: 2px solid var(--accent-hover);
+    outline-offset: 3px;
+}
+
+/* Live sources and recordings, side by side on a wide screen. */
+
+.home-now {
+    border-top: 0;
+    padding-top: 40px;
+}
+
+.home-status {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 40px 64px;
+    align-items: start;
+}
+
+.home-wide {
+    grid-column: 1 / -1;
+}
+
+.home-checking {
+    grid-column: 1 / -1;
+    margin: 0;
+}
+
+.home-block {
+    min-width: 0;
+    animation: fade-in 0.25s ease-out;
+}
+
+.home-block .home-head {
+    margin-bottom: 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.home-block .home-h2 {
+    font-size: 24px;
+}
+
+.home-empty {
+    max-width: 44em;
+    margin: 0;
+    padding: 18px 0 0;
+}
+
+.home-empty > p {
+    margin: 0;
+}
+
+.home-live-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--live);
+    font-size: 15px;
+    font-variant: small-caps;
+    letter-spacing: 0.05em;
+}
+
+.home-live-dot {
+    display: inline-block;
+    flex: none;
+    width: 8px;
+    height: 8px;
+    background: var(--live);
+    animation: pulse 1.4s infinite;
+}
+
+.home-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.home-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border);
+    transition: background-color 0.12s, box-shadow 0.12s;
+}
+
+.home-item:hover,
+.home-item:focus-within {
+    background: linear-gradient(90deg, var(--glow), transparent 70%);
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.home-item.live {
+    box-shadow: inset 3px 0 0 var(--live);
+}
+
+.home-item-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.home-item-title {
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-size: 16px;
+}
+
+.home-item-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 16px;
+    margin: 3px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.home-item .btn {
+    flex: none;
+    min-width: 64px;
+    justify-content: center;
+}
+
+/* A small scoreboard, the two teams about a box with the goals of each. */
+.home-board {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    margin: 4px 0 0;
+    font-size: 15px;
+}
+
+.home-board-team {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.home-item-title + .home-board {
+    color: var(--muted);
+}
+
+.home-item-main > .home-board:first-child {
+    margin-top: 0;
+    font-size: 16px;
+}
+
+.home-score {
+    flex: none;
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-bottom: 2px solid var(--accent);
+    background: var(--surface-2);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.5;
+}
+
+.home-score > span[aria-hidden] {
+    min-width: 1.8em;
+    padding: 0 4px;
+    text-align: center;
+}
+
+.home-score > span[aria-hidden] + span[aria-hidden] {
+    border-left: 1px solid var(--border);
+}
+
+/* The first run guide and the offline note. */
+
+.home-intro {
+    max-width: 44em;
+    margin: 20px 0 0;
+    font-size: 17px;
+}
+
+.home-steps {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 32px 40px;
+    margin: 32px 0 0;
+    padding: 0;
+}
+
+.home-step {
+    min-width: 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.home-step-n {
+    display: block;
+    color: var(--accent);
+    font-size: 40px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.home-step h3 {
+    margin: 10px 0 6px;
+}
+
+.home-step p {
+    margin: 0 0 10px;
+}
+
+.home-offline .home-head {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+.home-prose {
+    max-width: 44em;
+    padding: 4px 0 0 20px;
+    border-left: 3px solid var(--accent);
+}
+
+.home-prose > p {
+    margin: 0 0 10px;
+}
+
+.home-command {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    margin: 8px 0 2px;
+    padding: 6px 6px 6px 12px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    background: var(--bg);
+}
+
+/* Ligatures would join the two hyphens of an option into one dash. */
+.home code {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+    font-size: 0.88em;
+    font-variant-ligatures: none;
+    overflow-wrap: anywhere;
+}
+
+.home-command code {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.home-copy {
+    flex: none;
+}
+
+/* The montage, as wide as the band, in the frame of a picture. */
+
+.home-reel-video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    margin-top: 12px;
+    border: 1px solid var(--border);
+    background: #000000;
+}
+
+/* What the viewer does, a strip of short notes under line icons. */
+
+.home-features {
+    background: var(--surface);
+}
+
+.home-feature-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 44px 48px;
+    margin: 12px 0 0;
+    padding: 0;
+}
+
+.home-feature {
+    min-width: 0;
+}
+
+.home-icon {
+    display: block;
+    width: 34px;
+    height: 34px;
+    margin-bottom: 14px;
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.4;
+    stroke-linejoin: miter;
+    stroke-linecap: square;
+}
+
+.home-feature h3,
+.home-step h3 {
+    color: var(--text);
+    font-size: 19px;
+    font-variant: normal;
+    letter-spacing: normal;
+}
+
+.home-feature h3 {
+    margin: 0 0 6px;
+}
+
+.home-feature p {
+    max-width: 30em;
+    margin: 0;
+    color: var(--muted);
+}
+
+/* Keys. */
+
+.home-keys-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) repeat(3, minmax(0, 1fr));
+    gap: 28px 36px;
+}
+
+.home-keys-group h3 {
+    margin: 0 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    color: var(--accent-hover);
+    font-size: 16px;
+    font-variant: small-caps;
+    letter-spacing: 0.08em;
+}
+
+.home-keys-group dl {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 6px 12px;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.home-keys-group dt {
+    white-space: nowrap;
+}
+
+.home-keys-group dd {
+    margin: 0;
+    color: var(--muted);
+}
+
+.home-key-word {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.home-keys .home-head .btn kbd {
+    margin-left: 4px;
+}
+
+/* The foot of the page, what cuju is beside the links, then the version. */
+
+.home-foot {
+    background: var(--surface);
+    padding-bottom: 40px;
+}
+
+.home-foot-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 48px 72px;
+}
+
+.home-foot .home-head {
+    margin-bottom: 18px;
+}
+
+.home-foot .home-h2 {
+    font-size: 24px;
+}
+
+.home-about p {
+    max-width: 38em;
+    margin: 0 0 14px;
+}
+
+.home-credits {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.home-link-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 24px;
+    margin: 0;
+    padding: 0;
+}
+
+.home-link {
+    display: block;
+    padding: 8px 0 8px 12px;
+    color: var(--text);
+    text-decoration: none;
+    box-shadow: inset 1px 0 0 var(--border);
+    transition: box-shadow 0.12s, background-color 0.12s;
+}
+
+.home-link:hover {
+    background: linear-gradient(90deg, var(--glow), transparent 80%);
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.home-link-label {
+    display: block;
+    color: var(--link);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* An arrow after the name marks a link that opens a new tab, hidden words tell a screen reader. */
+.home-link-label::after {
+    content: " \2197" / "";
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 12px;
+    text-decoration: none;
+}
+
+.home-link-hint {
+    display: block;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.home-colophon {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.home-colophon-logo {
+    width: 24px;
+    height: 24px;
+    filter: var(--logo-filter);
+    opacity: 0.8;
+}
+
+.home-version {
+    font-variant-numeric: tabular-nums;
+}
+
+.home-version::before {
+    content: "";
+    display: inline-block;
+    width: 1px;
+    height: 12px;
+    margin-right: 16px;
+    background: var(--border);
+    vertical-align: -1px;
+}
+
+/* Medium screens fold the columns. */
+
+@media (max-width: 1100px) {
+    .home-keys-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .home-pitch-frame {
+        right: -18%;
+        width: 80%;
+    }
+}
+
+@media (max-width: 960px) {
+    .home-status,
+    .home-foot-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .home-feature-list,
+    .home-steps {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .home-pitch-frame {
+        opacity: 0.6;
+    }
+}
+
+/* Narrow screens stack everything in one column and center the opening band over the pitch. */
+
+@media (max-width: 640px) {
+    .home-wrap {
+        padding: 0 16px;
+    }
+
+    .home-band {
+        padding: 48px 0;
+    }
+
+    .home-now {
+        padding-top: 40px;
+    }
+
+    .home-hero {
+        min-height: 0;
+        padding: 40px 0 44px;
+    }
+
+    .home-pitch-frame {
+        top: auto;
+        bottom: -12%;
+        right: -40%;
+        width: 150%;
+        transform: none;
+        opacity: 0.55;
+    }
+
+    .home-wordmark {
+        width: 112px;
+        height: 112px;
+    }
+
+    .home-title {
+        margin-bottom: 16px;
+    }
+
+    .home-tagline {
+        font-size: 26px;
+    }
+
+    .home-lede {
+        margin-bottom: 26px;
+        font-size: 16px;
+    }
+
+    .home-actions {
+        gap: 8px;
+    }
+
+    .home-actions .btn {
+        flex: 1 1 auto;
+        padding: 8px 12px;
+        font-size: 16px;
+    }
+
+    .home-actions .home-cta {
+        flex-basis: 100%;
+        margin-right: 0;
+    }
+
+    .home-glance {
+        margin-top: 22px;
+        font-size: 14px;
+    }
+
+    .home-h2 {
+        font-size: 26px;
+    }
+
+    .home-block .home-h2,
+    .home-foot .home-h2 {
+        font-size: 22px;
+    }
+
+    .home-feature-list,
+    .home-steps,
+    .home-keys-grid,
+    .home-link-list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .home-feature-list {
+        gap: 28px;
+    }
+
+    /* On a phone the icon stands at the left of its note, which keeps the strip short. */
+    .home-feature {
+        display: grid;
+        grid-template-columns: 30px minmax(0, 1fr);
+        column-gap: 16px;
+    }
+
+    .home-feature .home-icon {
+        grid-row: 1 / span 2;
+        width: 30px;
+        height: 30px;
+        margin: 2px 0 0;
+    }
+
+    .home-item {
+        gap: 12px;
+        padding: 12px 8px;
+    }
+
+    .home-colophon {
+        margin-top: 40px;
+    }
+}

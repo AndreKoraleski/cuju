@@ -1,0 +1,342 @@
+<!doctype html>
+<!--
+Copyright 2026 The cuju Authors
+SPDX-License-Identifier: Apache-2.0
+-->
+<html lang="en-US">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <!-- The policy allows this page's own files only. The hash is that of the import map below, change both together. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; connect-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-lBIL8ypNcoDfLbcuy6MwwDfepPEr9EFYgYRzwmYX9mg='; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <title>cuju</title>
+    <link rel="icon" type="image/png" href="assets/cuju-logo.png">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="home.css">
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "./vendor/three/build/three.module.js",
+            "three/addons/": "./vendor/three/examples/jsm/"
+        }
+    }
+    </script>
+    <script src="js/capture.js"></script>
+    <script type="module" src="js/main.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#pages">Skip to main content</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
+    <symbol id="i-reverse" viewBox="0 0 24 24"><path d="M16 5v14L5 12z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></symbol>
+    <symbol id="i-frame-back" viewBox="0 0 24 24"><path d="M6 6h2v12H6zM19 6v12l-9-6z"/></symbol>
+    <symbol id="i-frame-forward" viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM5 6v12l9-6z"/></symbol>
+    <symbol id="i-restart" viewBox="0 0 24 24"><path d="M5 5h2v14H5zM20 5v14L8 12z"/></symbol>
+    <symbol id="i-goal" viewBox="0 0 24 24"><path d="M3 6h18v12h-2V8H5v10H3zM7 10h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zm-8 4h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M16 8.5a5 5 0 010 7M18.5 6a8.5 8.5 0 010 12" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 9h4l5-4v14l-5-4H4z"/></symbol>
+    <symbol id="i-muted" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-fullscreen" viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><path d="M3 7h18v10H3z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6 10h2v2H6zm4 0h2v2h-2zm4 0h2v2h-2zm-6 3h8v1.5H8z"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12 8.5a3.5 3.5 0 110 7 3.5 3.5 0 010-7zm8.5 2l-2-.4a6.8 6.8 0 00-.8-1.9l1.2-1.7-1.4-1.4-1.7 1.2a6.8 6.8 0 00-1.9-.8l-.4-2h-2l-.4 2a6.8 6.8 0 00-1.9.8L6.5 5.1 5.1 6.5l1.2 1.7a6.8 6.8 0 00-.8 1.9l-2 .4v2l2 .4c.2.7.4 1.3.8 1.9l-1.2 1.7 1.4 1.4 1.7-1.2c.6.4 1.2.6 1.9.8l.4 2h2l.4-2c.7-.2 1.3-.4 1.9-.8l1.7 1.2 1.4-1.4-1.2-1.7c.4-.6.6-1.2.8-1.9l2-.4z" fill-rule="evenodd"/></symbol>
+</svg>
+
+<div id="app" class="no-source" data-page="home">
+    <header id="topbar">
+        <!-- The logo is the way to the Home page. -->
+        <button id="home-btn" class="brand active" type="button" data-page="home" aria-label="Home" aria-current="page" title="Home"><img class="logo" src="assets/cuju-logo.png" alt="" width="28" height="28"></button>
+        <nav class="menu" aria-label="Pages">
+            <button data-page="watch">Watch</button>
+            <button data-page="play">Play</button>
+            <button data-page="recordings">Recordings</button>
+            <button data-page="matches">Matches</button>
+            <button data-page="teams">Teams</button>
+            <button data-page="field">Field</button>
+            <button id="open-help" data-page="help">Help</button>
+        </nav>
+        <!-- On a narrow screen the pages fold into one dropdown. -->
+        <div class="page-switch">
+            <button id="page-menu-btn" type="button" aria-label="Pages"><span id="page-menu-label">Home</span><span class="dd-caret" aria-hidden="true"></span></button>
+            <div id="page-menu" role="menu" aria-label="Pages">
+                <button type="button" role="menuitem" tabindex="-1" class="dd-item" data-page="home"><span class="dd-text"><span class="dd-label">Home</span></span></button>
+                <button type="button" role="menuitem" tabindex="-1" class="dd-item" data-page="watch"><span class="dd-text"><span class="dd-label">Watch</span></span></button>
+                <button type="button" role="menuitem" tabindex="-1" class="dd-item" data-page="play"><span class="dd-text"><span class="dd-label">Play</span></span></button>
+                <button type="button" role="menuitem" tabindex="-1" class="dd-item" data-page="recordings"><span class="dd-text"><span class="dd-label">Recordings</span></span></button>
+                <button type="button" role="menuitem" tabindex="-1" class="dd-item" data-page="matches"><span class="dd-text"><span class="dd-label">Matches</span></span></button>
+                <button type="button" role="menuitem" tabindex="-1" class="dd-item" data-page="teams"><span class="dd-text"><span class="dd-label">Teams</span></span></button>
+                <button type="button" role="menuitem" tabindex="-1" class="dd-item" data-page="field"><span class="dd-text"><span class="dd-label">Field</span></span></button>
+                <button type="button" role="menuitem" tabindex="-1" class="dd-item" data-page="help"><span class="dd-text"><span class="dd-label">Help</span></span></button>
+            </div>
+        </div>
+        <div class="top-actions">
+            <button id="open-settings" class="icon-btn" title="Settings" aria-label="Settings"><svg class="icon"><use href="#i-settings"/></svg></button>
+            <button id="fullscreen" class="icon-btn" title="Fullscreen (F)" aria-label="Fullscreen"><svg class="icon"><use href="#i-fullscreen"/></svg></button>
+        </div>
+    </header>
+
+    <main id="pages" tabindex="-1" aria-label="Main content">
+        <section id="page-home" class="page"></section>
+
+        <section id="page-watch" class="page" hidden>
+            <div id="watch">
+                <div id="stage" aria-label="Match view"></div>
+
+                <div id="watch-bar">
+                    <button id="match-menu-btn" class="bar-btn" type="button" title="Open a match, a live source or a goal"><span class="bar-label">Match</span><span id="live-count" class="live-dot" hidden></span><span class="dd-caret" aria-hidden="true"></span></button>
+                    <form id="address" autocomplete="off">
+                        <input id="address-input" type="text" spellcheck="false" placeholder="Live source or recording id, then Enter" aria-label="Source address">
+                        <button class="btn" type="submit">Open</button>
+                    </form>
+                    <button id="view-menu-btn" class="bar-btn" type="button" title="Camera, time of day, quality and theme"><span class="bar-label">View</span><span class="dd-caret" aria-hidden="true"></span></button>
+                </div>
+
+                <div id="hud" aria-live="polite">
+                    <div id="scoreboard" hidden>
+                        <span class="team left"><i class="chip"></i><b class="badge" hidden></b><span class="name">Left</span></span>
+                        <span class="scores"><span id="score-left">0</span><span id="score-right">0</span></span>
+                        <span class="team right"><span class="name">Right</span><b class="badge" hidden></b><i class="chip"></i></span>
+                        <span id="clock">00:00</span>
+                    </div>
+                    <div id="mode-banner"></div>
+                    <div id="goal-banner">
+                        <div class="goal-head"><i class="goal-chip"></i><span class="goal-title">Goal</span><span id="goal-team"></span><span id="goal-score" hidden></span></div>
+                        <div class="goal-who"><span id="goal-number" hidden></span><span id="goal-scorer" hidden></span><span id="goal-minute" hidden></span></div>
+                        <div id="goal-assist" hidden></div>
+                        <button id="goal-replay" class="btn small">Replay <kbd>R</kbd></button>
+                    </div>
+                    <div id="replay-badge" hidden data-prompt><span class="replay-word">Replay</span><span id="replay-hint" hidden></span></div>
+                    <div id="follow-label" hidden></div>
+                </div>
+                <div id="stinger" hidden aria-hidden="true"><div class="stinger-band"></div><div class="stinger-band two"></div><img class="stinger-logo" src="assets/cuju-logo.png" alt=""></div>
+
+                <div id="watch-empty">
+                    <p>Open a recording or a live source from the <b>Match</b> menu above, type its id and press Enter, or drop a .cjr file here. <button id="open-file" class="link" type="button">Choose a file</button></p>
+                    <p class="muted small offline-note">The server is not answering. Opening a file still works.</p>
+                    <input id="file-input" type="file" accept=".cjr,application/gzip,application/octet-stream" hidden>
+                </div>
+
+                <div id="waiting" hidden><div class="spinner"></div><span id="waiting-text">Waiting for the source</span></div>
+
+                <div id="controls">
+                    <div class="timeline-row">
+                        <span id="time-now" class="time">0:00</span>
+                        <div id="timeline" tabindex="0" role="slider" aria-label="Timeline">
+                            <div class="track"></div>
+                            <div id="timeline-fill"></div>
+                            <div id="timeline-markers"></div>
+                            <div id="timeline-thumb"></div>
+                            <div id="timeline-tip"></div>
+                        </div>
+                        <span id="time-total" class="time">0:00</span>
+                    </div>
+                    <div class="button-row">
+                        <div class="group transport">
+                            <button class="icon-btn" data-act="restart" title="Restart (Home)" aria-label="Restart"><svg class="icon"><use href="#i-restart"/></svg></button>
+                            <button class="icon-btn" data-act="prev-goal" title="Previous goal (Shift N)" aria-label="Previous goal"><svg class="icon flip"><use href="#i-goal"/></svg></button>
+                            <button class="text-btn" data-act="back-30" title="Back 30 seconds (Shift Left)">30</button>
+                            <button class="text-btn" data-act="back-5" title="Back 5 seconds (Left while playing)">5</button>
+                            <button class="icon-btn" data-act="frame-back" title="Previous frame (comma)" aria-label="Previous frame"><svg class="icon"><use href="#i-frame-back"/></svg></button>
+                            <button id="btn-reverse" class="icon-btn" data-act="reverse" title="Play backwards (J)" aria-label="Play backwards"><svg class="icon"><use href="#i-reverse"/></svg></button>
+                            <button id="btn-pause" class="icon-btn" data-act="pause" title="Pause (K or Space)" aria-label="Pause"><svg class="icon"><use href="#i-pause"/></svg></button>
+                            <button id="btn-play" class="icon-btn big" data-act="play" title="Play (L or Space)" aria-label="Play"><svg class="icon"><use href="#i-play"/></svg></button>
+                            <button class="icon-btn" data-act="frame-forward" title="Next frame (period)" aria-label="Next frame"><svg class="icon"><use href="#i-frame-forward"/></svg></button>
+                            <button class="text-btn fwd" data-act="forward-5" title="Forward 5 seconds (Right while playing)">5</button>
+                            <button class="text-btn fwd" data-act="forward-30" title="Forward 30 seconds (Shift Right)">30</button>
+                            <button class="icon-btn" data-act="next-goal" title="Next goal (N)" aria-label="Next goal"><svg class="icon"><use href="#i-goal"/></svg></button>
+                        </div>
+                        <div class="group">
+                            <label class="speed" title="Speed (Up and Down arrows)">
+                                <span class="sr-only">Speed</span>
+                                <select id="speed">
+                                    <option value="0.25">0.25×</option>
+                                    <option value="0.5">0.5×</option>
+                                    <option value="1" selected>1×</option>
+                                    <option value="2">2×</option>
+                                    <option value="4">4×</option>
+                                </select>
+                            </label>
+                            <div id="live-box" hidden>
+                                <span id="live-state">Live</span>
+                                <button id="go-live" class="btn small live" data-act="live" hidden>Go live</button>
+                                <button id="post-show" class="btn small" data-act="post-show" hidden>Match summary</button>
+                            </div>
+                        </div>
+                        <div class="group">
+                            <button id="mute" class="icon-btn" title="Mute (M)" aria-label="Mute" aria-pressed="false">
+                                <svg class="icon on"><use href="#i-volume"/></svg><svg class="icon off"><use href="#i-muted"/></svg>
+                            </button>
+                            <input id="volume" type="range" min="0" max="1" step="0.01" value="0.7" aria-label="Volume">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tv-hint" aria-hidden="true">Broadcast mode. The bottom edge or <kbd>Esc</kbd> shows the controls, <kbd>T</kbd> leaves.</div>
+
+                <div id="drop-hint"><div>Drop a .cjr recording to open it</div></div>
+                <div id="loading" hidden role="status">
+                    <div class="spinner"></div>
+                    <div class="loading-body">
+                        <div id="loading-text">Loading</div>
+                        <div class="progress"><div id="loading-bar" class="bar"></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-play" class="page" hidden></section>
+
+        <section id="page-recordings" class="page" hidden></section>
+
+        <section id="page-matches" class="page" hidden></section>
+
+        <section id="page-teams" class="page" hidden>
+            <div class="teams-layout">
+                <aside id="teams-side"></aside>
+                <div class="teams-main">
+                    <div id="teams-placeholder" class="placeholder"><h2>Choose a team</h2><p>Pick a team on the left to customize its kit, players, model, fans, celebrations, sounds and sponsors. Matches between teams are played from the Matches page.</p></div>
+                    <div id="team-editor" hidden></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-field" class="page" hidden></section>
+        <section id="page-help" class="page" hidden><div id="help" aria-label="Help">
+            <div class="help-card">
+                <header><h2>Help</h2><button id="help-close" class="icon-btn" aria-label="Close" title="Close (Esc)">✕</button></header>
+                <p>Keyboard. Tab and Shift Tab move between controls. Enter or Space activates a control.
+                    Arrow keys, Home and End move through menus and lists. Esc closes panels and returns
+                    focus. Focus the picture for camera and playback keys. Field arrows turn the camera,
+                    Watch uses Alt and arrows. Plus and minus zoom. Color fields also accept hex values.</p>
+                <section><h3>Getting started</h3>
+                <p>Watch, open a file or choose a source. Recordings, browse saved games.
+                    Record a batch with cuju.render.Recorder. Watch live with cuju.render.watch.
+                    Matches, choose teams and request a game. Play, choose a side and start.</p>
+                <h3>Pages</h3><p>Home, choose an activity. Teams, import submissions and edit players.
+                    Field, arrange the pitch and stadium. Help, find controls and guides.</p>
+                <h3>Play controls</h3><p>Arrow keys move. S passes short, W passes long, A passes high
+                    or tackles, D shoots. Hold E to sprint and C to dribble. Esc pauses.</p>
+                <p class="pad-help">Controller, <span class="padicon pad-stick" role="img" aria-label="Left stick">L</span> left stick or
+                    <span class="padicon pad-dpad" role="img" aria-label="Directional pad"></span> D pad moves.
+                    <span class="padicon pad-face pad-a" role="img" aria-label="A button">A</span> passes short,
+                    <span class="padicon pad-face pad-b" role="img" aria-label="B button">B</span> shoots,
+                    <span class="padicon pad-face pad-x" role="img" aria-label="X button">X</span> passes high or tackles,
+                    <span class="padicon pad-face pad-y" role="img" aria-label="Y button">Y</span> passes long.
+                    <span class="padicon pad-trigger" role="img" aria-label="Right trigger">RT</span> sprints,
+                    <span class="padicon pad-shoulder" role="img" aria-label="Right bumper">RB</span> dribbles.
+                    <span class="padicon pad-menu" role="img" aria-label="Menu button, also called Start"></span> pauses,
+                    <span class="padicon pad-view" role="img" aria-label="View button, also called Back"></span> shows controls.
+                    The controls card in Play sets up other controllers.</p>
+                <p>Home pauses your game. Return to Play to Resume or Quit. Quit to Home ends the game
+                    and saves it when Save to Recordings is selected.</p>
+                <p><a href="https://github.com/AndreKoraleski/cuju/blob/main/docs/rendering.md">Full guide</a>
+                    <a href="https://github.com/AndreKoraleski/cuju">Repository</a></p></section>
+                <div class="help-grid">
+                    <section>
+                        <h3>Playback</h3>
+                        <dl>
+                            <dt><kbd>Space</kbd></dt><dd>Play or pause</dd>
+                            <dt><kbd>L</kbd></dt><dd>Play forward, again to speed up</dd>
+                            <dt><kbd>J</kbd></dt><dd>Play backwards, again to speed up</dd>
+                            <dt><kbd>K</kbd></dt><dd>Pause</dd>
+                            <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>One frame when paused, 5 seconds when playing</dd>
+                            <dt><kbd>Shift</kbd> <kbd>←</kbd> <kbd>→</kbd></dt><dd>30 seconds</dd>
+                            <dt><kbd>,</kbd> <kbd>.</kbd></dt><dd>One frame</dd>
+                            <dt><kbd>↑</kbd> <kbd>↓</kbd></dt><dd>Faster, slower</dd>
+                            <dt><kbd>Home</kbd></dt><dd>Restart</dd>
+                            <dt><kbd>End</kbd></dt><dd>End, or go live</dd>
+                            <dt><kbd>N</kbd></dt><dd>Next goal, with Shift the previous one</dd>
+                            <dt><kbd>R</kbd></dt><dd>Replay the last goal</dd>
+                            <dt><kbd>Shift</kbd> <kbd>R</kbd></dt><dd>More angles of the last goal</dd>
+                            <dt><kbd>Enter</kbd></dt><dd>Skip the lineups, a celebration, a replay or a post-match part</dd>
+                            <dt><kbd>Esc</kbd></dt><dd>End the lineups, replays or the post-match show</dd>
+                        </dl>
+                    </section>
+                    <section>
+                        <h3>Cameras</h3>
+                        <dl>
+                            <dt><kbd>V</kbd></dt><dd>Broadcast, tactical, behind the goal, follow player and free in turn</dd>
+                            <dt><kbd>[</kbd> <kbd>]</kbd></dt><dd>Chase camera on the previous or next player</dd>
+                            <dt><kbd>1</kbd> to <kbd>0</kbd></dt><dd>A left team player, back line first and each line from left to right, with Shift the right team</dd>
+                            <dt><kbd>G</kbd></dt><dd>The left keeper, with Shift the right keeper</dd>
+                            <dt>Again</dt><dd>Over the shoulder, first person, side, face</dd>
+                            <dt><kbd>B</kbd></dt><dd>Follow the ball at the current angle</dd>
+                            <dt><kbd>P</kbd></dt><dd>Follow the player on the ball</dd>
+                            <dt><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></dt><dd>Move, starts the free camera</dd>
+                            <dt><kbd>E</kbd> <kbd>Q</kbd></dt><dd>Up and down, <kbd>C</kbd> also down</dd>
+                            <dt><kbd>Shift</kbd></dt><dd>Move faster</dd>
+                            <dt>Drag</dt><dd>Look around, a right click captures the pointer when the setting allows it</dd>
+                            <dt>Wheel</dt><dd>Flying speed, or distance when following</dd>
+                        </dl>
+                    </section>
+                    <section>
+                        <h3>View</h3>
+                        <dl>
+                            <dt><kbd>T</kbd></dt><dd>Broadcast mode, the picture alone, <kbd>Esc</kbd> shows the controls, twice leaves</dd>
+                            <dt><kbd>F</kbd></dt><dd>Fullscreen</dd>
+                            <dt><kbd>M</kbd></dt><dd>Mute</dd>
+                            <dt><kbd>H</kbd></dt><dd>This help</dd>
+                            <dt><kbd>Esc</kbd></dt><dd>Close panels, leave a player camera, release the pointer</dd>
+                        </dl>
+                    </section>
+                </div>
+            </div>
+        </div></section>
+
+    </main>
+
+    <div id="settings" class="popover" role="dialog" aria-label="Settings">
+        <h3 class="panel-title">Settings</h3>
+        <label class="check"><input type="checkbox" id="idle-return"> Return to broadcast when idle</label>
+        <label>Seconds without input before the free camera returns
+            <input type="number" id="idle-seconds" min="5" max="300" step="5" value="20">
+        </label>
+        <label class="check"><input type="checkbox" id="trail"> Ball trail</label>
+        <label class="check"><input type="checkbox" id="tv-mode"> Broadcast mode, the picture alone as on television <kbd>T</kbd></label>
+        <label class="check"><input type="checkbox" id="lineups-on"> Lineups before kick-off</label>
+        <label class="check"><input type="checkbox" id="celebrations-on"> Celebrations after goals</label>
+        <label class="check"><input type="checkbox" id="replays"> Replays after goals</label>
+        <label class="check"><input type="checkbox" id="decision-replays"> Decision replays, fouls, cards and offsides</label>
+        <label class="check"><input type="checkbox" id="restart-transitions"> Restart transitions</label>
+        <label>Slow motion in replays
+            <select id="slowmo">
+                <option value="1">Off</option>
+                <option value="0.5">Half speed</option>
+                <option value="0.25">Quarter speed</option>
+            </select>
+        </label>
+        <label class="check"><input type="checkbox" id="podium-on"> Post-match show, facts, highlights, player of the match, podium</label>
+        <label class="check"><input type="checkbox" id="classic"> GRF classic pitch</label>
+        <label class="check"><input type="checkbox" id="pointer-lock"> Capture the mouse on right click in the free camera, Esc releases it</label>
+        <label class="check"><input type="checkbox" id="saved-style"> Use the kits saved in the match</label>
+        <p class="muted small">Without that, teams known to this server wear their current style.</p>
+        <label>Theme
+            <select id="theme">
+                <option value="system">Follow the system</option>
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+            </select>
+        </label>
+    </div>
+
+    <!-- The menus of the Watch page. The container view-environment belongs to the time of day,
+         the sky and the weather, which scene code fills. -->
+    <div id="match-menu" role="menu" aria-label="Match"></div>
+    <div id="view-menu" role="menu" aria-label="View">
+        <div class="dd-heading" role="presentation"><span>Camera</span><span class="dd-aside"><kbd>V</kbd> cycles the first five</span></div>
+        <div id="view-cameras"></div>
+        <div id="view-screen"></div>
+        <div class="dd-heading" role="presentation"><span>Time and weather</span></div>
+        <div id="view-environment"></div>
+        <div class="dd-heading" role="presentation"><span>Quality</span></div>
+        <div id="view-quality"></div>
+        <div class="dd-heading" role="presentation"><span>Theme</span></div>
+        <div id="view-theme"></div>
+    </div>
+
+
+    <div id="toast" role="status"></div>
+    <div id="fatal" hidden></div>
+</div>
+</body>
+</html>
