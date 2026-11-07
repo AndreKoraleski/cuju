@@ -164,11 +164,59 @@ scenarios](custom-scenarios.md).
 
 For debugging, a state saved before a surprising event replays it any number of times.
 
-For viewing, a match from cuju is shown in GRF, either from a dump of the match, described in
-[Migrating from GRF](migrating-from-grf.md#dumps-from-a-batch), or from a state loaded into a GRF
-that renders. Rendering changes how GRF plays, as described in [Differences from
-GRF](differences-from-grf.md#rendering-players-and-wrappers), so the rendered continuation becomes
-a different match from the moment rendering starts.
+For viewing, cuju's renderer reads the joints, the ball and the score out of states and draws them
+in a browser, saved or live, without changing the match, as described in [Rendering](rendering.md).
+A `.cjr` recording keeps the fields needed for playback, including the referee calls, engine
+scorer and scenario timing. Keep a full state for restoring a match with `set_state`, and use a
+recording for watching it. The timing distinguishes a second half, an episode ending and full
+time, while a file saved during play ends at its last captured frame.
+A match from cuju is also shown in GRF, either from a dump of the match, described in [Migrating
+from GRF](migrating-from-grf.md#dumps-from-a-batch), or from a state loaded into a GRF that renders.
+Rendering in GRF changes how GRF plays, as described in [Differences from
+GRF](differences-from-grf.md#rendering-players-and-wrappers), so that continuation becomes a
+different match from the moment rendering starts.
+
+## Reading fields
+
+The module `cuju.state` reads single fields of a state without decoding the rest. GRF's state
+format lists every field of the engine one after another, and the position of a field in the bytes
+moves with the lengths of the lists before it. The engine in memory holds every list at its full
+capacity instead, so each field there keeps one offset in every state of every scenario. The
+**layout** names each field by a path, such as `match.ball.positionBuffer` or
+`match.players[3].base.humanoid.nodes[0].rotation`, with its offset, size and type in memory, and
+`gather` loads a state and copies the chosen fields out of the engine.
+
+```python
+import cuju
+import cuju.state
+
+batch = cuju.BatchEnvironment('5_vs_5_l4_r0', environment_count=1, device='cpu')
+batch.reset()
+state = batch.get_state(0)
+layout = cuju.state.layout()  # about 38,000 fields, by path
+ball, step = cuju.state.read(state, ['match.ball.positionBuffer', 'environment.step'])
+```
+
+`read` returns each field as a numpy array, a vector as three floats and a quaternion as four, x,
+y, z then w, and `gather` returns the raw bytes of the fields one after another, which suits many
+fields read at once. Both take the `frame` of the result. The **rest frame** keeps the match as the
+engine holds it, where the right team plays mirrored, with its x and y negated, and the **pitch
+frame** turns the right team into the frame of the pitch, so that both teams and the ball share one
+frame with the left goal at negative x. Positions divided by 54.4 for x and by -83.6 for y give the
+coordinates of GRF's raw observation in the pitch frame, bit for bit, when each division runs in
+double precision and rounds to a 32-bit float, as the public tests check.
+
+Paths past the count of a list, such as the eleventh player of `5_vs_5`, exist in the layout and
+hold no value of the match, and two reads of one state may return different bytes there, so a caller
+reads the count of a list, or the team sizes of the scenario, before its entries. The players are
+listed with the team that the engine processes first before the other, which is the left team unless
+GRF's `reverse_team_processing` is set, as `match.firstTeam` and
+`environment.scenario.reverseTeamProcessing` record. The step counter, `environment.step`, reads -1
+right after a reset and counts each step from there. Reading fields costs one load of the state,
+about half a millisecond on a laptop processor for an eleven a side match, and `gather` adds little
+for a few hundred fields. `read` builds one array per field, which costs about 10 microseconds each,
+so a thousand fields take a few milliseconds. The renderer reads 199 fields of every step of an
+eleven a side match this way, with the fourteen joints of each player read as one block.
 
 ## Cost
 
@@ -185,6 +233,7 @@ player for each second between kick-offs. A thousand states occupy about 100 MB.
 ## See also
 
 - [Episodes and seeds](episodes-and-seeds.md)
+- [Rendering](rendering.md)
 - [Exactness](exactness.md)
 - [Custom scenarios](custom-scenarios.md)
 - [Migrating from GRF](migrating-from-grf.md)
