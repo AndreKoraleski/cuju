@@ -141,3 +141,46 @@ def test_evaluate_plays_one_match_per_environment():
     scores = kaggle.evaluate(shooter, episodes=2, scenario='academy_empty_goal_close')
     assert len(scores) == 2 and all(len(score) == 2 for score in scores)
     assert all(isinstance(goals, int) for score in scores for goals in score)
+
+
+def test_agent_runner_calls_as_kaggle_and_checks_answers(batch):
+    seen = []
+
+    def one(obs):
+        seen.append(('one', obs.step))
+        return [Action.Shot]
+
+    def two(obs, configuration):
+        seen.append(('two', configuration.get('name')))
+        return np.array([3, -1])
+
+    def spread(*arguments):
+        seen.append(('spread', len(arguments)))
+        return 5
+
+    assert kaggle.accepts_configuration(two) and kaggle.accepts_configuration(spread)
+    assert not kaggle.accepts_configuration(one)
+    single = kaggle.observation(batch, 0, 0, step=4)
+    assert kaggle.AgentRunner(one).act(single, 19) == [12]
+    assert kaggle.AgentRunner(spread).act(single, 19) == [5]
+    host = {name: tensor.cpu() for name, tensor in batch.raw().items()}
+    several = kaggle.observation(batch, 0, [0, 1], step=2, raw=host)
+    assert several.controlled_players == 2
+    assert several.players_raw == [
+        kaggle.players_raw(batch, 0, 0)[0],
+        kaggle.players_raw(batch, 0, 1)[0],
+    ]
+    runner = kaggle.AgentRunner(two, configuration={'name': 'test'})
+    assert runner.accepts_configuration and runner.act(several, 19) == [3, -1]
+    assert seen == [('one', 4), ('spread', 2), ('two', 'test')]
+    with pytest.raises(ValueError, match='each of the 2'):
+        kaggle.AgentRunner(lambda obs: [1]).act(several, 19)
+    with pytest.raises(IndexError):
+        kaggle.AgentRunner(lambda obs: [19]).act(single, 19)
+    with pytest.raises(TypeError):
+        kaggle.action_index(['shot'], 19)
+    assert kaggle.action_index(np.array([7]), 19) == 7
+    assert kaggle.action_indices((1, Action.Idle), 19, 2) == [1, 0]
+    # The names before 0.2.1 stay as aliases.
+    assert kaggle._action is kaggle.action_index and kaggle._actions is kaggle.action_indices
+    assert kaggle._accepts_configuration is kaggle.accepts_configuration

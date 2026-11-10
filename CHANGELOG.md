@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Sample matches of eleven and of five a side, which the renderer's library receives on the first
     start of the server, and `cuju render sample`, which adds them again.
+- `cuju.kaggle.AgentRunner`, `accepts_configuration`, `action_index` and `action_indices`, which
+    call a Kaggle agent function as Kaggle does and check its answers, and `cuju.kaggle.observation`
+    takes a list of agents for Kaggle's multi-agent form and a shared host copy of the raw arrays.
 
 ## [0.2.0] - 2026-11-07
 

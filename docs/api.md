@@ -300,7 +300,7 @@ importing `gfootball` registers them in GRF.
 | `cuju.players` | `Bot(batch, agent)` and `Lazy(batch, agents)`, the `bot` and `lazy` players of GRF, each with `act()`, and `Bot.reset(mask=None)` |
 | `cuju.raw` | `grf_observation(raw, environment, agent, own_players, other_players)`, `grf_observations(batch, environment, agents=None, final=False)` and `team_sizes(batch, environment, agent)`, the raw dictionaries of GRF in the types of GRF |
 | `cuju.wrappers` | `MultiAgentToSingleAgent(batch, left_players, right_players, action_set=None, stacked=False, squeeze=False)`, the wrapper of GRF for scenarios that set `control_all_players` |
-| `cuju.kaggle` | `players_raw(batch, environment, agent, final=False)`, `observation(batch, environment, agent, step=0, final=False)`, `KaggleAgent(function, batch, agent, configuration=None, agents=None)` and `evaluate(left, right=None, episodes=1, scenario='11_vs_11_kaggle', seed=0, device='cpu', threads=0, configuration=None)`, the observations and agents of Kaggle, and matches of Kaggle agents, each the first episode of its environment, as Kaggle plays them |
+| `cuju.kaggle` | `players_raw(batch, environment, agent, final=False)`, `observation(batch, environment, agent, step=0, final=False, raw=None)`, `KaggleAgent(function, batch, agent, configuration=None, agents=None)` and `evaluate(left, right=None, episodes=1, scenario='11_vs_11_kaggle', seed=0, device='cpu', threads=0, configuration=None)`, the observations and agents of Kaggle, and matches of Kaggle agents, each the first episode of its environment, as Kaggle plays them. `AgentRunner(function, configuration=None)` with `act(obs, count)`, `accepts_configuration(function)`, `action_index(answer, count)` and `action_indices(answer, count, players)` run a Kaggle agent function and check its answers |
 | `cuju.gfootball` | the import paths of GRF, `env` with `create_environment`, `config.Config`, `football_env.FootballEnv`, `football_action_set`, `observation_preprocessing`, `scenario_builder`, `wrappers`, `player_base`, `players`, `script_helpers`, and `replay`, `dump_to_txt` and `scenarios`, so that GRF code runs with its imports switched. Described in [Migrating from GRF](migrating-from-grf.md) |
 | `cuju.check` | `cuju check`, with `[--long] [--device all\|cpu\|cuda] [--case NAME] [--list]` |
 | `cuju.state` | `layout()`, every field of the match in memory by path, `gather(state, fields, frame='rest')`, the bytes of chosen fields of a state, `read(state, fields, frame='rest')`, the same as numpy arrays, `Field` and `FRAMES`. Described in [States](states.md#reading-fields) |
@@ -316,6 +316,25 @@ The scenario may be bundled or one of the six renderer GRF MARL scenarios. Each 
 sets GRF's team difficulty from 0 to 1, with `None` keeping that side's scenario value.
 The browser also provides Play a game with keyboard and controller input, described in
 [Rendering](rendering.md#playing-a-game).
+
+`cuju.kaggle.AgentRunner` calls a Kaggle agent function as Kaggle does, with the configuration
+second when `accepts_configuration(function)` finds two positional parameters, and its
+`act(obs, count)` returns one action index per controlled player, checked against an action set of
+`count` actions. One controlled player may answer in Kaggle's single form, such as `[12]`, `12` or
+an `Action` member, and several answer with one action each. `action_index(answer, count)` and
+`action_indices(answer, count, players)` check an answer alone and raise `ValueError`, `TypeError`
+or `IndexError` for one outside the set. With a list of agents, `observation` builds Kaggle's
+multi-agent form, and `raw` takes one host copy of `batch.raw()` that several observations share.
+Together they serve a program that plays matches step by step.
+
+```python
+from cuju import kaggle
+
+runner = kaggle.AgentRunner(agent)
+host = {name: tensor.cpu() for name, tensor in batch.raw().items()}
+obs = kaggle.observation(batch, 0, [0, 1, 2], step=0, raw=host)
+actions = runner.act(obs, batch.action_count)
+```
 
 ## Command line
 

@@ -4,8 +4,10 @@
 """Kaggle's GRF competition protocol, with `players_raw` from a batch and Kaggle agents in a batch.
 
 `KaggleAgent` runs a Kaggle agent function, such as a `submission.py` agent or a public rule-based
-bot, as one agent of every environment of a batch, and `evaluate` plays whole matches with it. The
-guide is in the repository's `docs/recipes.md`, under Train for the Kaggle competition.
+bot, as one agent of every environment of a batch, and `evaluate` plays whole matches with it.
+`AgentRunner` calls such a function as Kaggle does and checks its answer, for a program that builds
+the observations itself. The guide is in the repository's `docs/recipes.md`, under Train for the
+Kaggle competition.
 """
 
 from __future__ import annotations
@@ -19,7 +21,16 @@ import torch
 from . import BatchEnvironment
 from .raw import grf_observation, team_sizes
 
-__all__ = ['KaggleAgent', 'evaluate', 'observation', 'players_raw']
+__all__ = [
+    'AgentRunner',
+    'KaggleAgent',
+    'accepts_configuration',
+    'action_index',
+    'action_indices',
+    'evaluate',
+    'observation',
+    'players_raw',
+]
 
 # Kaggle: the time an agent may overrun across a match, in seconds, which every observation holds.
 _OVERAGE_TIME = 60
@@ -65,29 +76,50 @@ def players_raw(
 
 
 def observation(
-    batch: Any, environment: int, agent: int, step: int = 0, final: bool = False
+    batch: Any,
+    environment: int,
+    agent: int | list[int],
+    step: int = 0,
+    final: bool = False,
+    raw: dict[str, Any] | None = None,
 ) -> _Struct:
     """Returns a Kaggle agent's observation, a dictionary whose keys are also attributes.
 
     It holds `players_raw`, `controlled_players`, and Kaggle's `step` and `remainingOverageTime`.
+    A list of agents gives Kaggle's multi-agent form, one entry of `players_raw` per agent in the
+    order of the list, and `controlled_players` their count.
 
     Args:
         batch: A batch with the raw representation or `with_raw=True`.
         environment: The index of the environment.
-        agent: The index of the agent.
+        agent: The index of the agent, or a list of the agents that one function plays.
         step: The steps of the episode so far, which Kaggle counts from 0.
         final: Whether to read the step that ended the last episode.
+        raw: The raw arrays to read in place of the batch's, such as one copy of `batch.raw()` on
+            the host that the observations of several agents share. `final` then has no effect.
     """
+    several = isinstance(agent, (list, tuple))
+    agents = [int(index) for index in agent] if several else [int(agent)]
+    if raw is None:
+        raw = batch.final_raw() if final else batch.raw()
     return _Struct(
-        players_raw=players_raw(batch, environment, agent, final),
-        controlled_players=1,
+        players_raw=[
+            _lists(grf_observation(raw, environment, index, *team_sizes(batch, environment, index)))
+            for index in agents
+        ],
+        controlled_players=len(agents),
         step=step,
         remainingOverageTime=_OVERAGE_TIME,
     )
 
 
-def _accepts_configuration(function):
-    """Returns whether an agent takes a configuration, which Kaggle decides by parameter count."""
+def accepts_configuration(function: Any) -> bool:
+    """Returns whether an agent function takes a configuration, as Kaggle decides it.
+
+    Kaggle passes the configuration as a second argument to a function with at least two
+    positional parameters, or with `*args`, and calls any other function with the observation
+    alone.
+    """
     try:
         parameters = inspect.signature(function).parameters.values()
     except (TypeError, ValueError):
@@ -102,8 +134,20 @@ def _accepts_configuration(function):
     )
 
 
-def _action(value, count):
-    """Returns the action index of a Kaggle agent's answer, `[action]`, an integer or an enum."""
+def action_index(value: Any, count: int) -> int:
+    """Returns the action index of a Kaggle agent's answer for one controlled player.
+
+    Args:
+        value: The answer, `[action]` as Kaggle's agents return it, an integer, a one-element
+            array or an enum whose value is the index, such as `Action` of Kaggle's helpers.
+        count: The actions of the action set, and an index from `-count` to `count - 1` counts
+            from the end for a negative one, as in GRF.
+
+    Raises:
+        ValueError: If a list holds other than one action.
+        TypeError: If the action is not an integer.
+        IndexError: If the action lies outside the action set.
+    """
     if isinstance(value, (list, tuple)):
         if len(value) != 1:
             raise ValueError(f'expected one action for the one controlled player, found {value!r}')
@@ -111,8 +155,19 @@ def _action(value, count):
     return _index(value, count)
 
 
-def _actions(value, count, players):
-    """Returns the action indices of an answer for `players` controlled players, one each."""
+def action_indices(value: Any, count: int, players: int) -> list[int]:
+    """Returns the action indices of an answer for `players` controlled players, one each.
+
+    Args:
+        value: The answer, a list, tuple or array with one action per controlled player, each in
+            a form that `action_index` takes.
+        count: The actions of the action set.
+        players: The controlled players.
+
+    Raises:
+        ValueError: If the answer holds other than one action per player.
+        TypeError, IndexError: As `action_index` raises them for an action.
+    """
     if isinstance(value, np.ndarray):
         value = value.reshape(-1).tolist()
     if not isinstance(value, (list, tuple)) or len(value) != players:
@@ -135,6 +190,65 @@ def _index(value, count):
     if not -count <= int(value) < count:
         raise IndexError(f'expected an action from {-count} to {count - 1}, found {value}')
     return int(value)
+
+
+# The names before 0.2.1, which the renderer of cuju 0.2.0 imports.
+_accepts_configuration = accepts_configuration
+_action = action_index
+_actions = action_indices
+
+
+class AgentRunner:
+    """Calls a Kaggle agent function as Kaggle does, and checks its answer against an action set.
+
+    The runner suits a program that builds the observations itself, such as one that plays a
+    match step by step, and `KaggleAgent` covers the agents of a batch.
+
+    Attributes:
+        function: The agent function.
+        configuration: What a function that takes a configuration receives second.
+        accepts_configuration: Whether the function takes a configuration.
+    """
+
+    def __init__(self, function: Any, configuration: dict[str, Any] | None = None) -> None:
+        """Binds a Kaggle agent function.
+
+        Args:
+            function: `agent(obs)` or `agent(obs, configuration)`, as `accepts_configuration`
+                tells them apart.
+            configuration: The configuration of Kaggle's environment that the function reads, as
+                a dictionary, and `None` passes an empty one.
+        """
+        self.function = function
+        self.configuration = _Struct(configuration or {})
+        self.accepts_configuration = accepts_configuration(function)
+
+    def __call__(self, obs: Any) -> Any:
+        """Calls the function with an observation, and the configuration if it takes one, and
+        returns its answer as it is."""
+        if self.accepts_configuration:
+            return self.function(obs, self.configuration)
+        return self.function(obs)
+
+    def act(self, obs: Any, count: int) -> list[int]:
+        """Calls the function and returns one action index per controlled player.
+
+        One controlled player may answer in Kaggle's single form, as `action_index` takes it, and
+        several answer with one action each, in the order of `obs['players_raw']`.
+
+        Args:
+            obs: The observation, as `observation` returns it.
+            count: The actions of the action set.
+
+        Raises:
+            TypeError, ValueError, IndexError: As `action_index` and `action_indices` raise them,
+                and whatever the function raises.
+        """
+        players = len(obs['players_raw'])
+        answer = self(obs)
+        if players == 1:
+            return [action_index(answer, count)]
+        return action_indices(answer, count, players)
 
 
 class KaggleAgent:
@@ -193,7 +307,7 @@ class KaggleAgent:
         self.batch = batch
         self.agent = self.agents[0]
         self.configuration = _Struct(configuration or {})
-        self._two_arguments = _accepts_configuration(function)
+        self._two_arguments = accepts_configuration(function)
         self._steps = [0] * batch.environment_count
 
     def reset(self, mask: Any = None) -> None:
@@ -248,9 +362,9 @@ class KaggleAgent:
                 else self.function(obs)
             )
             if self._several:
-                actions.append(_actions(answer, self.batch.action_count, players))
+                actions.append(action_indices(answer, self.batch.action_count, players))
             else:
-                actions.append(_action(answer, self.batch.action_count))
+                actions.append(action_index(answer, self.batch.action_count))
             self._steps[environment] += 1
         return torch.tensor(actions, dtype=torch.int32, device=self.batch._torch_device)
 
