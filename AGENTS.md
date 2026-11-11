@@ -60,7 +60,8 @@ agent each.
 
 ### Rules of use
 
-- Clone each output that a later call needs. Every `reset` and `step` returns the same tensors and overwrites them.
+- Clone each output that a later call needs. Every `reset` and `step` returns the same tensors and
+    overwrites them.
 - Build actions as `int32` on `batch.torch_device`. Such actions take no copy, and any other
     tensor is copied each step.
 - Leave the reset to the step. The step that ends an episode starts the next. Use
@@ -111,16 +112,10 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) before a change. This part is the short 
 
 ### Layout
 
-The engine is header-only, in `include/cuju/`. `simulation/` is GRF's game, `batch/` the batch and
-its outputs, `state/` GRF's state format, `cpu/` and `gpu/` the two backends. Write logic once, in
-the shared headers, and let a backend only schedule it. `src/` holds the C API and the two library
-sources, and `python/cuju/` the package.
-
-In `python/cuju/`, `__init__.py` exports the public names and each public module sits at the top.
-`_batch/` holds the implementation of `BatchEnvironment`, from loading the library to the pickles of
-a state. `gfootball/` stands in for GRF's package, and `data/` holds the bundles, the animations and
-the digests. `state.py` reads single fields of a state, `_renderer.py` names the renderer, the
-package cuju-render, and `__main__.py` is the command `cuju`, one entry per subcommand.
+- `include/cuju/` holds the header-only engine, written once for both backends.
+- `src/` holds the C API and the two library sources.
+- `python/cuju/` holds the package, `_batch/` the implementation of `BatchEnvironment`.
+- CONTRIBUTING.md maps them.
 
 ### Build and test
 
@@ -129,6 +124,7 @@ pip install .                                  # both libraries where nvcc is fo
 CMAKE_ARGS=-DCUJU_CUDA=OFF pip install .       # the CPU library alone
 pytest tests/                                  # the public suite, a couple of minutes
 cuju check                                     # the shipped self-check
+python ci/check_links.py --offline             # the links of the README and the docs
 ruff check && ruff format --check              # Python
 clang-format-18 --dry-run -Werror <files>      # C++ and CUDA
 ```
@@ -142,8 +138,6 @@ clang-format-18 --dry-run -Werror <files>      # C++ and CUDA
 - In Python, follow PEP 8 through `ruff`, with line length 100, single quotes and Google-style
     docstrings. Raise the classes of `cuju.errors` rather than bare built-ins.
 - Start new files with `Copyright 2026 The cuju Authors` and `SPDX-License-Identifier: Apache-2.0`.
-- Write documentation in plain, precise sentences, with GRF's names for GRF's things. Prose uses
-    only words, commas and periods.
 
 ### Leave alone unless the pull request states a reason
 
@@ -155,8 +149,3 @@ clang-format-18 --dry-run -Werror <files>      # C++ and CUDA
     `src/*_api.h`.
 - The ownership of views. A view or buffer that a batch hands out holds `batch._native`, never the
     batch, so that a dropped batch is freed.
-
-### Commits
-
-Write one line in the imperative, at most 72 characters, with no body, such as
-`Port the flight of the ball`.

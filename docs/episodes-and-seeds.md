@@ -124,8 +124,8 @@ since the batch allocates its worlds without playing.
 ### Undefined paths
 
 GRF leaves a few paths of its engine undefined, such as a set piece without a taker, and at such a
-path GRF has no result for cuju to equal. No shipped scenario is known to reach one. When an
-environment reaches one, the batch stops with `cuju.UndefinedPathError`, a `RuntimeError`.
+path GRF has no result for cuju to equal. Every shipped scenario avoids them, as far as is known.
+When an environment reaches one, the batch stops with `cuju.UndefinedPathError`, a `RuntimeError`.
 
 On the CPU, the step raises the error in the same call and names the environment and GRF's reason.
 On the GPU, the device traps, which ends the CUDA context of the process, so the next CUDA call
@@ -187,9 +187,9 @@ Three settings choose the matches, from coarse to fine, as the table lists.
 `reset(seeds=...)` takes one seed per environment as a list, a tuple, a numpy array or an integer
 tensor, or a single integer for every environment. Each is from 0 to 4,294,967,295, or -1, which
 draws that environment's seed as `seeds=None` would. `reverse` takes one flag per environment in the
-same forms, 0 or 1, `False` or `True`, or one for all. Without `reverse`, the flag follows the
-parity of the seed, as in GRF. The flag takes effect at the first reset of an environment, since it
-holds for the whole run. A value of the wrong length or range raises `cuju.ArgumentError`, a
+same forms, 0 or 1, `False` or `True`, or one for all. When `reverse` is left out, the flag follows
+the parity of the seed, as in GRF. The flag takes effect at the first reset of an environment, since
+it holds for the whole run. A value of the wrong length or range raises `cuju.ArgumentError`, a
 `ValueError`. A floating-point seed or flag raises `TypeError`, even an integral one such as 5.0, as
 GRF refuses a float for its seed.
 

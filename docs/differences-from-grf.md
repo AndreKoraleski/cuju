@@ -119,10 +119,9 @@ built for another platform or C library can play other matches, for the reasons 
 
 GRF leaves a few paths of its engine undefined, such as a set piece without a taker, and at such a
 path it has no result for cuju to equal. cuju stops there, on the CPU with `cuju.UndefinedPathError`
-naming the environment and GRF's reason, and on the GPU with a trap of the device. No shipped
-scenario is known to reach one. The behaviour on
-each device, and the checkpoints that protect a long run, are described in [Episodes and
-seeds](episodes-and-seeds.md#undefined-paths).
+naming the environment and GRF's reason, and on the GPU with a trap of the device. Every shipped
+scenario avoids them, as far as is known. The behaviour on each device, and the checkpoints that
+protect a long run, are described in [Episodes and seeds](episodes-and-seeds.md#undefined-paths).
 
 ## Rendering, players and wrappers
 

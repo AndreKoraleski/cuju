@@ -60,11 +60,11 @@ These paths, and `cuju.env` beneath them, build GRF's spaces with Gymnasium, whi
 `spaces` installs. As in GRF, `import cuju.gfootball` binds `cuju.gfootball.env`, which loads at
 its first use, so the import itself succeeds on an installation without Gymnasium.
 
-`FootballEnv(config)` plays the players of a `Config` as GRF's does, with at most one `agent`.
-Without an agent, as in GRF's `play_game.py`, its players play every step of `env.step([])`, and
-`reset` and `step` return GRF's observation of the match, the dictionary that GRF's dumps hold,
-with the scoring reward as a `float32` scalar array. A configuration with no player at all leaves
-the batch no raw observation to read, so its observation is `None`.
+`FootballEnv(config)` plays the players of a `Config` as GRF's does, with at most one `agent`. A
+configuration that leaves out the agent, as in GRF's `play_game.py`, lets its players play every
+step of `env.step([])`, and `reset` and `step` return GRF's observation of the match, the dictionary
+that GRF's dumps hold, with the scoring reward as a `float32` scalar array. A configuration with no
+player at all leaves the batch no raw observation to read, so its observation is `None`.
 
 ```sh
 pip install 'cuju[spaces]'
@@ -108,7 +108,7 @@ counterparts in cuju or in GRF itself, and they fall into three groups.
 | `env.unwrapped._env` and the private attributes of the players | the public API, or `get_state` | GRF's internals, with no core object per environment in cuju |
 | `render`, `write_video`, the representations `pixels` and `pixels_gray`, `PixelsStateWrapper` | dumps, which GRF's `dump_to_video` renders | rendering takes place in GRF, from dumps |
 | the `keyboard` player and `real_time` | GRF's own `keyboard` player, in a GRF that renders | interactive play needs a renderer |
-| the `ppo2_cnn` player | the policy loaded in the caller's code and played as an agent | a TensorFlow checkpoint player |
+| the `ppo2_cnn` player | the policy loaded in the caller's code and played as an agent | a player of an OpenAI Baselines checkpoint |
 | `create_remote_environment` | an environment from `create_environment`, for evaluation on the caller's machine | a client of GRF's online game server |
 | importing a scenario module, as `import gfootball.scenarios.<name>` | the scenario's name, or `cuju.scenarios` with a custom scenario file | a batch plays bundles rather than importable modules |
 
@@ -126,8 +126,9 @@ tracker belongs here too, and states saved at the steps of interest replace it.
 
 The third group holds features that belong to GRF's wider ecosystem. Remote play went through GRF's
 online game server, and evaluation in cuju runs on the caller's machine with `create_environment` or
-a batch. The `ppo2_cnn` player is a TensorFlow checkpoint, which loads in the caller's code and
-plays as an agent. A scenario is a name or a file, which a batch turns into a bundle.
+a batch. The `ppo2_cnn` player plays a checkpoint of OpenAI Baselines, whose policy loads in the
+caller's code and plays as an agent. A scenario is a name or a file, which a batch turns into a
+bundle.
 
 ## GRF's interface for one environment
 
@@ -566,9 +567,9 @@ unseeded GRF draws different ones in each run. A different `seed` per run gives 
 gym is installed too, so a check such as `isinstance(space, gym.spaces.Box)` is written against
 `gymnasium.spaces.Box`.
 
-**GRF's PPO example.** `gfootball/examples/run_ppo2.py` runs OpenAI Baselines on TensorFlow 1.15,
-which installs on Python 3.7 or older, and cuju runs on Python 3.10 or later. The learner is
-therefore ported to PyTorch or kept in a process of its own.
+**GRF's PPO example.** `gfootball/examples/run_ppo2.py` runs OpenAI Baselines, whose dependencies
+install on Python 3.7 or older, and cuju runs on Python 3.10 or later. The learner is therefore
+ported to PyTorch or kept in a process of its own.
 
 ## Reproduction of GRF results
 
