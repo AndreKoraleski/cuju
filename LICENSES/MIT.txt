@@ -1,6 +1,4 @@
 The ports in include/cuju/libm that are taken from Arm Optimized Routines v21.02 carry this license.
-three.js and Fabric.js in python/cuju/render/web/vendor carry this license as well, each with
-its copyright in the LICENSE file beside it.
 
 MIT License
 

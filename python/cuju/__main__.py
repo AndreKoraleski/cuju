@@ -16,6 +16,7 @@ import importlib
 import sys
 from typing import NamedTuple
 
+from . import _renderer
 from ._version import __version__
 
 
@@ -81,7 +82,7 @@ def main(arguments: list[str] | None = None) -> int:
             print(_usage())
             return 0
         if rest[0] in COMMANDS:
-            return _run(rest[0], ['--help'])
+            return _guarded(rest[0], ['--help'])
         if rest[0] == 'help':
             print(_usage())
             return 0
@@ -89,8 +90,20 @@ def main(arguments: list[str] | None = None) -> int:
     if name not in COMMANDS:
         print(f'cuju: no command {name!r}\n\n{_usage()}', file=sys.stderr)
         return 2
+    return _guarded(name, rest)
+
+
+def _guarded(name: str, arguments: list[str]) -> int:
+    """Runs a command as `_run` does, and turns a missing renderer and argparse's exit into
+    an exit status."""
     try:
-        return _run(name, rest)
+        return _run(name, arguments)
+    except ModuleNotFoundError as error:
+        # The renderer is optional, and a command of a missing one names the package to install.
+        if not _renderer.is_missing(error):
+            raise
+        print(f'cuju {name}: {_renderer.MESSAGE}', file=sys.stderr)
+        return 1
     except SystemExit as exit:
         # argparse leaves with `SystemExit`, whose code is the status.
         return exit.code if isinstance(exit.code, int) else 0 if exit.code is None else 1

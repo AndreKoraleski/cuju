@@ -151,6 +151,14 @@ The extra `spaces` adds Gymnasium, which builds the spaces of GRF's interface in
 pip install 'cuju[spaces]'
 ```
 
+The extra `render` adds the browser renderer, the package cuju-render, which
+[Rendering](rendering.md) describes. It installs into the folder of cuju and releases with it,
+so the extra always takes a renderer that fits the installed cuju.
+
+```sh
+pip install 'cuju[render]'
+```
+
 The wheels for Linux on x86-64 and for Windows carry both libraries, and the wheels for Linux on
 Arm and for macOS carry the CPU library. The CUDA library holds machine code for the four GPU
 architectures that were checked for exactness.

@@ -136,7 +136,7 @@ Each topic has an article of its own.
 | [Rewards and actions](rewards-and-actions.md) | What an agent is paid for and what it can do. |
 | [Episodes and seeds](episodes-and-seeds.md) | The end of an episode and the match that each environment plays. |
 | [States](states.md) | Saving, restoring and moving a match between cuju and GRF, and reading single fields. |
-| [Rendering](rendering.md) | Watching matches in a browser, saved or live, and the team registry. |
+| [Rendering](rendering.md) | Watching matches in a browser, saved or live, with the package cuju-render. |
 | [Backends](backends.md) | The GPU and CPU backends and their fit with PyTorch. |
 | [Performance](performance.md) | Measured throughput and the size of a batch. |
 | [Recipes](recipes.md) | Patterns for wiring a batch into training. |

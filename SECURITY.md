@@ -4,7 +4,8 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
+| 0.2.x   | :white_check_mark: |
+| 0.1.x   | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -34,23 +35,11 @@ Several of cuju's inputs are code or pickles. Load only the ones that come from 
     accepts only the classes of GRF's dumps.
 - **Action logs name their scenarios.** `cuju.replay` creates the batch that a log describes, so a
     log that names a scenario file runs that file.
-- **Team submissions are Python.** The renderer's registry plays Kaggle submissions, so a match
-    requested with `cuju render play` or on the renderer's page runs the submission's code with the
-    permissions of the user who started the server. Add only trusted submissions to a registry.
-- **Team folders and models come from outside.** A submission folder, an archive, a team exported
-    from another registry or a custom player model is checked before it is stored. Archive members
-    must land inside the team's folder, archives are capped in size and file count, images are
-    checked by their bytes, and a model must be a self-contained binary glTF file. The page also
-    refuses links to other places inside models and drawings.
 
-## The Renderer's Server
+## The Renderer
 
-`cuju render serve` listens on the loopback interface alone and serves an API that deletes files and
-plays submitted code. Every request must name the server by a loopback address in its Host header.
-GET requests may carry any origin. Other requests must come from the same origin, by scheme, host
-and port, or carry no Origin header. Its page carries a Content Security Policy that keeps scripts,
-styles, images and connections to the same origin. A server on another machine is reached through
-a tunnel, such as the port forwarding of SSH, and never by listening on another interface.
+The renderer, the package cuju-render, plays submitted code and serves an API on the
+loopback interface. Its own [security policy][render-security] describes both and takes their
+reports.
 
-A weakness in these protections, such as a way for another site to change data through the API or
-for an upload to write outside the team folder, is a vulnerability and belongs in a private report.
+[render-security]: https://github.com/AndreKoraleski/cuju-render/blob/main/SECURITY.md

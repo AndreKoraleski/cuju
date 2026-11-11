@@ -16,7 +16,8 @@ waiting for the simulator.
 
 cuju suits the cases where the simulator is the bottleneck, in on-policy and multi-agent training,
 self-play, large evaluations and hyperparameter sweeps, and every result that has to stand next to
-published GRF numbers. Matches are watched in a browser with cuju's renderer, saved or live, as
+published GRF numbers. Matches are watched in a browser with cuju's renderer,
+[cuju-render](https://github.com/AndreKoraleski/cuju-render), saved or live, as
 [Rendering](docs/rendering.md) describes, and GRF's own tools replay the dumps that cuju writes.
 
 cuju is an independent project, neither affiliated with nor endorsed by Google. Google Research
@@ -36,8 +37,6 @@ Football is a project of Google Research, and Google is a trademark of Google LL
 [![PyPI](https://img.shields.io/pypi/v/cuju)](https://pypi.org/project/cuju)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/AndreKoraleski/cuju/blob/main/examples/cuju_quickstart.ipynb)
-
-[![A teaser of cuju's renderer, a floodlit goal, the beach and space arenas, a team of custom players, the podium and a grid of many matches, linking to the full montage](https://raw.githubusercontent.com/AndreKoraleski/cuju/main/docs/assets/cuju-teaser.webp)](https://github.com/AndreKoraleski/cuju/blob/main/docs/assets/cuju-montage.mp4)
 
 ## Quick start
 
@@ -164,12 +163,14 @@ code for the architectures checked for exactness, 7.5, 8.0, 8.6 and 8.9, and oth
 source. On macOS on Intel processors, PyTorch ends with 2.2, and `torch.compile` traces a step
 from PyTorch 2.4 on. [Installation](docs/installation.md) gives the requirements of each platform.
 
-Run `cuju render serve --open` to watch saved matches and live training in the browser. Its Home
-page leads to recordings, requested matches between teams, team and field editors and Play a game
-for keyboard or controller input. Teams can control one or several players, and Ability sets the
+The renderer, the package cuju-render, installs with `pip install 'cuju[render]'`. Run
+`cuju render demo` for a first look, a live match between the built in AIs in the browser within
+seconds, and `cuju render serve --open` to watch saved matches and live training. Its Home page
+leads to recordings, requested matches between teams, team and field editors and Play a game for
+keyboard or controller input. Teams can control one or several players, and Ability sets the
 strength of the built in AI. Watching preserves the match, as [Rendering](docs/rendering.md)
-describes. GRF's tools replay cuju's dumps and make videos, while the representation `pixels`
-remains GRF's.
+describes. `cuju render video` exports a range of a recording as an MP4 video, GRF's tools replay
+cuju's dumps and make videos of their own, and the representation `pixels` remains GRF's.
 [Differences from GRF](docs/differences-from-grf.md) describes every known difference.
 
 ## Documentation
@@ -247,6 +248,5 @@ are ports of the GNU C Library under the LGPL 2.1 or later, and both libraries c
     LICENSES/ with them and offering the matching source, which every PyPI release carries as its
     sdist.
 - Compiling the C++ headers into another program brings the LGPL into that program.
-- The logo, the montage, its teaser and its poster in `docs/assets/` are licensed under CC BY 4.0,
-    so they may be reused with credit, without any right to the name or the logo as a mark of
-    endorsement. The montage's music is "Upbeat loop" by mistermender, CC0 1.0.
+- The logo in `docs/assets/` is licensed under CC BY 4.0, so it may be reused with credit, without
+    any right to the name or the logo as a mark of endorsement.

@@ -18,7 +18,6 @@ from typing import NamedTuple
 
 import numpy as np
 
-from ._batch import library as _libraries
 from .errors import ArgumentError, ChoiceError, LibraryError, StateError
 
 __all__ = ['FRAMES', 'Field', 'gather', 'layout', 'read']
@@ -58,6 +57,9 @@ class Field(NamedTuple):
 @functools.cache
 def _library():
     """Returns a loaded library, the CPU one where it loads, else the CUDA one."""
+    # Loading imports PyTorch, so it waits for the first state, and `import cuju.state` stays light.
+    from ._batch import library as _libraries
+
     failures = []
     for device in ('cpu', 'cuda'):
         try:

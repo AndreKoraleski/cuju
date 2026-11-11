@@ -15,9 +15,6 @@ import sys
 from typing import ClassVar
 
 from ._batch.assets import bundled_assets, bundled_scenarios
-from ._batch.environment import BatchEnvironment, memory_estimate
-from ._batch.library import library_path
-from ._batch.memory import _MemoryEstimate
 from ._version import __version__
 from .errors import (
     ActionRangeError,
@@ -35,6 +32,7 @@ from .errors import (
 )
 
 __all__ = [
+    'ActionLog',
     'ActionRangeError',
     'ArgumentError',
     'BatchEnvironment',
@@ -42,6 +40,7 @@ __all__ = [
     'ClosedError',
     'ConfigurationError',
     'DeviceError',
+    'Digest',
     'EnvironmentIndexError',
     'Error',
     'LibraryError',
@@ -52,29 +51,65 @@ __all__ = [
     '__version__',
     'bundled_assets',
     'bundled_scenarios',
+    'digest',
     'library_path',
     'memory_estimate',
+    'replay',
 ]
 
 # The names keep `cuju` as their module, so that their reprs and pickles name the public path.
-for _name in (
-    BatchEnvironment,
-    bundled_assets,
-    bundled_scenarios,
-    library_path,
-    memory_estimate,
-    _MemoryEstimate,
-):
+for _name in (bundled_assets, bundled_scenarios):
     _name.__module__ = __name__
 del _name
 
-# The digests and action logs build on `BatchEnvironment`.
-from .action_log import ActionLog, Digest, digest, replay  # noqa: E402
+# The names that build on PyTorch load on first use, so that `import cuju` and the commands of the
+# renderer that step no batch start without importing PyTorch. Each maps to its module.
+_LAZY = {
+    'BatchEnvironment': '_batch.environment',
+    'memory_estimate': '_batch.environment',
+    'library_path': '_batch.library',
+    '_MemoryEstimate': '_batch.memory',
+    'ActionLog': 'action_log',
+    'Digest': 'action_log',
+    'digest': 'action_log',
+    'replay': 'action_log',
+    'MultiDeviceBatch': 'multi_device',
+}
 
-__all__ += ['ActionLog', 'Digest', 'digest', 'replay']
 
-# Last, since it builds on `BatchEnvironment`.
-from .multi_device import MultiDeviceBatch  # noqa: E402
+def _load_batch() -> None:
+    """Imports the names of `BatchEnvironment` and its helpers, which then name `cuju` their module.
+
+    The names keep `cuju` as their module, so that their reprs and pickles name the public path.
+    """
+    from ._batch.environment import BatchEnvironment, memory_estimate
+    from ._batch.library import library_path
+    from ._batch.memory import _MemoryEstimate
+
+    loaded = {
+        'BatchEnvironment': BatchEnvironment,
+        'memory_estimate': memory_estimate,
+        'library_path': library_path,
+        '_MemoryEstimate': _MemoryEstimate,
+    }
+    for value in loaded.values():
+        value.__module__ = __name__
+    globals().update(loaded)
+
+
+def __getattr__(name: str):
+    module = _LAZY.get(name)
+    if module is None:
+        raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
+    if module.startswith('_batch'):
+        _load_batch()
+    else:
+        globals()[name] = getattr(importlib.import_module(f'.{module}', __name__), name)
+    return globals()[name]
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(_LAZY))
 
 
 class _RegisteringLoader:
@@ -140,3 +175,37 @@ def _register_gymnasium_ids():
 
 
 _register_gymnasium_ids()
+
+
+def _with_renderer_portions(path):
+    """Returns `path` and, after it, every folder of the renderer that `sys.path` holds elsewhere.
+
+    The renderer, the package cuju-render, installs its files into this folder, and an editable
+    install of it keeps them in its own checkout, whose `cuju` folder holds `render` and no
+    `__init__.py`. Such a folder joins the package as an absolute path. A folder `cuju` with an
+    `__init__.py` of its own is a whole cuju, such as an older installation or a checkout in the
+    current directory, and stays out, so that its renderer never stands in for a missing one.
+    """
+    import os
+
+    folders = list(path)
+    seen = {os.path.normcase(os.path.abspath(folder)) for folder in folders}
+    for entry in sys.path:
+        if not isinstance(entry, str):
+            continue
+        folder = os.path.abspath(os.path.join(entry, __name__))
+        key = os.path.normcase(folder)
+        if key in seen or os.path.isfile(os.path.join(folder, '__init__.py')):
+            continue
+        if os.path.isdir(os.path.join(folder, 'render')):
+            seen.add(key)
+            folders.append(folder)
+    return folders
+
+
+__path__ = _with_renderer_portions(__path__)
+
+# The renderer is optional, so importing it where it is missing names the package that installs it.
+from . import _renderer  # noqa: E402
+
+_renderer.install_finder()

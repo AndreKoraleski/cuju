@@ -33,6 +33,10 @@ needs_cuda = pytest.mark.skipif(not CUDA, reason='no CUDA device or library')
 RESIDENT = """
 import cuju
 
+# The package loads the engine and PyTorch at the first use of a batch, so the memory they take
+# stays out of the measurement.
+cuju.BatchEnvironment
+
 
 def resident():
     with open('/proc/self/status', encoding='ascii') as status:

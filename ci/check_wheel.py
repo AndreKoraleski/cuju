@@ -4,6 +4,7 @@
 
 Usage: `python ci/check_wheel.py [--cpu-only] <wheel>...`. A wheel of `cuju` holds the CPU and the
 CUDA library; with `--cpu-only`, one of `cuju-cpu` holds the CPU library and no CUDA library.
+Neither holds the renderer, which is the package cuju-render.
 """
 
 import sys
@@ -31,6 +32,9 @@ def problems(path, cpu_only):
         for name in LICENSES
         if not any(n.endswith(f'licenses/{name}') for n in names)
     ]
+    renderer = sorted(name for name in names if name.startswith('cuju/render/'))
+    if renderer:
+        found.append(f'expected no renderer, found {renderer[0]} and {len(renderer) - 1} more')
     libraries = {name.rpartition('/')[2] for name in names if name.startswith('cuju/')}
     if not libraries & set(CPU_LIBRARIES):
         found.append('missing the CPU library')

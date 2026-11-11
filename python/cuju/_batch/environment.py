@@ -169,6 +169,16 @@ def _host(values, dtype):
     return torch.as_tensor(values, dtype=dtype).to('cpu').contiguous()
 
 
+def _observer_failed(observer, error):
+    """Warns that a step observer raised and was removed, while the batch goes on."""
+    _log.LOGGER.warning(
+        'cuju: removed the step observer %r, which raised %s: %s',
+        observer,
+        type(error).__name__,
+        error,
+    )
+
+
 def _per_environment(values, dtype, name, count, error=ConfigurationError):
     """Returns `values` as one host value per environment; a single value serves every one."""
     array = _host(values, dtype)
@@ -253,8 +263,10 @@ class BatchEnvironment:
         ((1024, 4), (1024,))
     """
 
-    # The live source of `CUJU_RENDER`, or `None`, which every batch has until its constructor ends.
-    _live = None
+    # The step observers, in the order they were added. A batch without any pays one check per step.
+    _observers: tuple[Any, ...] = ()
+    # Whether `close` has begun, after which the batch takes no observer and removes none.
+    _closing = False
 
     def __init__(
         self,
@@ -436,7 +448,6 @@ class BatchEnvironment:
         # What the views of the buffers keep alive, without the batch.
         self._native = _Native(self._library, self._torch_device)
         requested = [assets] if isinstance(assets, str) or callable(assets) else list(assets)
-        # The renderer names the scenario of its recordings from what the batch was created with.
         self._requested = requested
         resolved = [_resolve_asset(asset) for asset in requested]
         paths = [path for path, _ in resolved]
@@ -690,25 +701,118 @@ class BatchEnvironment:
                 self.close()
                 raise
         if os.environ.get('CUJU_RENDER'):
-            # Rendering reads states and never writes one, so every output stays as it is.
-            from ..render import _live
+            # The renderer reads states and never writes one, so every output stays as it is.
+            from .. import _renderer
 
-            try:
-                self._live = _live.from_environment(self, requested)
-            except Exception as error:
-                _live.disable(self, error)
+            _renderer.on_batch_created(self)
 
-    def _show(self, done):
-        """Hands a step to the live source, which a failure turns off rather than the step."""
-        # A captured CUDA graph replays without Python, so a step under capture is not shown.
-        if self.device == 'cuda' and torch.cuda.is_current_stream_capturing():
+    @property
+    def scenario_name(self) -> str:
+        """The scenarios that the batch was created with, as their names without folders or
+        suffixes, joined by commas, such as `5_vs_5_l4_r0` or `academy_corner, my_scenario`."""
+        names = []
+        for asset in self._requested:
+            name = os.path.basename(os.fspath(asset))
+            for suffix in ('.cjb', '.py'):
+                name = name.removesuffix(suffix)
+            if name not in names:
+                names.append(name)
+        return ', '.join(names)
+
+    @property
+    def observers(self) -> tuple[Any, ...]:
+        """The step observers of the batch, in the order that they are called."""
+        return self._observers
+
+    def add_observer(self, observer: Any) -> Any:
+        """Calls `observer` after every `reset` and step of the batch, and when the batch closes.
+
+        The batch calls `observer(batch, done, information)`. After `step` and `step_wait`, `done`
+        is the done flags that the step returns, and `information` holds the entries of the
+        dictionary that the step returns and the step's rewards under `reward`, the tensor that the
+        step returns, in a dictionary of its own, so the step's own dictionary stays as it is. After
+        `reset` and `reset_done`, `done` is `None` and `information` maps `reset` to the
+        `[environment_count]` booleans of the environments that started an episode, or to `None`
+        when every environment did. When the batch closes, `done` is `None` and `information`
+        maps `close` to `True`, and the batch drops its observers after that call. Observers run
+        in the order that they were added, after the outputs are written, and they may read the
+        batch, such as its states, but must leave its outputs as they are. An observer that closes
+        the batch during a reset or a step makes that call raise `ClosedError`, since the outputs
+        view the freed buffers.
+
+        A batch dropped without `close` makes no close call. An observer that keeps the batch in an
+        attribute forms a cycle with it, which holds the batch's memory until Python collects the
+        cycle, so an observer that needs the batch between its calls holds it through a `weakref`.
+
+        An observer that raises an `Exception` is removed, with one warning through the logger
+        `cuju`, and the batch goes on. A step or reset captured into a CUDA graph, or run by a
+        function that `torch.compile` compiled, calls no observer, since it runs without Python.
+
+        Args:
+            observer: The callable.
+
+        Returns:
+            The observer, so that a call can add and keep it at once.
+
+        Raises:
+            ArgumentError: If the observer is not callable or was already added. It is a
+                `ValueError`.
+            ClosedError: If the batch is closed or closing. It is a `RuntimeError`.
+        """
+        self._handle()
+        if self._closing:
+            raise ClosedError('the batch is closing')
+        if not callable(observer):
+            raise ArgumentError(f'expected a callable observer, found {observer!r}')
+        if any(added is observer for added in self._observers):
+            raise ArgumentError(f'expected an observer that was not added yet, found {observer!r}')
+        self._observers = (*self._observers, observer)
+        return observer
+
+    def remove_observer(self, observer: Any) -> None:
+        """Stops calling an observer that `add_observer` added.
+
+        Once `close` begins the batch drops every observer, so the call then does nothing, as for
+        an observer that removes itself during its close call.
+
+        Raises:
+            ArgumentError: If the open batch has no such observer. It is a `ValueError`.
+        """
+        if not self._discard_observer(observer) and not self._closing:
+            raise ArgumentError(f'expected an observer of the batch, found {observer!r}')
+
+    def _discard_observer(self, observer):
+        """Removes an observer, and returns whether the batch had it."""
+        kept = tuple(added for added in self._observers if added is not observer)
+        found = len(kept) != len(self._observers)
+        self._observers = kept
+        return found
+
+    def _capturing(self):
+        """Returns whether the batch's stream is capturing a CUDA graph, which runs without Python
+        when it replays, so that a call under capture is not observed."""
+        if self.device == 'cpu':
+            return False
+        with self._on_device():
+            return torch.cuda.is_current_stream_capturing()
+
+    def _notify(self, done, information):
+        """Calls every observer, and removes one that raises with a warning, sparing the call."""
+        if self._capturing():
             return
-        try:
-            self._live.after_step(done)
-        except Exception as error:
-            from ..render import _live
-
-            _live.disable(self, error)
+        for observer in self._observers:
+            # An observer may remove another, which then misses the call.
+            if not any(added is observer for added in self._observers):
+                continue
+            try:
+                observer(self, done, information)
+            except Exception as error:
+                self._discard_observer(observer)
+                _observer_failed(observer, error)
+        # An observer that closed the batch freed the buffers that the outputs view, so the call
+        # raises rather than return them.
+        if self._closing:
+            raise ClosedError('an observer closed the batch during the call')
 
     def _output_ranges(self):
         """Returns the address and the size in bytes of every output buffer of the batch."""
@@ -738,14 +842,30 @@ class BatchEnvironment:
 
         The tensors that the batch returned view those buffers, so none may be used after it, and
         every later call on the batch raises `ClosedError`, a `RuntimeError`. A batch dropped
-        without `close` frees them once no tensor that it returned remains.
+        without `close` frees them once no tensor that it returned remains, and makes no close call
+        to its observers.
+
+        The observers receive their close call in order, and one may remove itself or another
+        during it. A call of `close` from an observer's close call returns at once, and the first
+        call frees the batch once every observer has had its call.
         """
-        live, self._live = self._live, None
-        if live is not None:
-            live.close()
-        native = getattr(self, '_native', None)
-        if native is not None:
-            native.free()
+        if self._closing:
+            return
+        self._closing = True
+        try:
+            for observer in self._observers:
+                # An observer may remove another, which then misses the call.
+                if not any(added is observer for added in self._observers):
+                    continue
+                try:
+                    observer(self, None, {'close': True})
+                except Exception as error:
+                    _observer_failed(observer, error)
+        finally:
+            self._observers = ()
+            native = getattr(self, '_native', None)
+            if native is not None:
+                native.free()
 
     def __enter__(self) -> BatchEnvironment:
         self._handle()
@@ -1034,7 +1154,10 @@ class BatchEnvironment:
                     self._stream(),
                 )
             )
-        return self._outputs()[0]
+        observation = self._outputs()[0]
+        if self._observers:
+            self._notify(None, {'reset': None})
+        return observation
 
     def _reset_masked(self, mask, seed_array, reverse_array, synchronize=False):
         """Resets the environments of `mask`, or all for `None`, through the masked entry."""
@@ -1068,7 +1191,10 @@ class BatchEnvironment:
                 )
             )
         self._wait_in_debug()
-        return self._outputs()[0]
+        observation = self._outputs()[0]
+        if self._observers and not self._capturing():
+            self._notify(None, {'reset': None if mask_array is None else mask_array.bool()})
+        return observation
 
     def reset_done(self) -> None:
         """Starts the next episode of every environment whose episode ended.
@@ -1086,9 +1212,13 @@ class BatchEnvironment:
         # Under `torch.compile` the call goes through the operator `cuju::reset_done`.
         if _CUSTOM_OPERATORS and torch.compiler.is_compiling():
             return self._compiled_reset_done()
+        # The reset clears the done flags, so the observers receive a copy of them from before.
+        ended = self._outputs()[2].bool() if self._observers and not self._capturing() else None
         with self._on_device():
             self._check(self._library.cuju_environment_reset_done(self._handle(), self._stream()))
         self._wait_in_debug()
+        if self._observers:
+            self._notify(None, {'reset': ended})
 
     def observation(self) -> Any:
         """Returns the observation of every agent that the last `reset` or `step` returned."""
@@ -1221,18 +1351,14 @@ class BatchEnvironment:
         self._check(status)
         self._wait_in_debug()
         observation, reward, done, final = self._outputs()
-        if self._live is not None:
-            self._show(done)
         if self._score_reward is None:
             self._score_reward = self._buffer(
                 'score_reward', (self.environment_count,), torch.int32
             )
-        return (
-            observation,
-            reward,
-            done,
-            {'final_observation': final, 'score_reward': self._score_reward},
-        )
+        information = {'final_observation': final, 'score_reward': self._score_reward}
+        if self._observers:
+            self._notify(done, {**information, 'reward': reward})
+        return observation, reward, done, information
 
     def _check_device_actions(self, actions):
         """Raises `ActionRangeError` for an action in GPU memory outside the set, before a step."""
@@ -1348,14 +1474,10 @@ class BatchEnvironment:
         self._step_in_flight = False
         self._check(self._library.cuju_environment_step_wait(self._handle()))
         observation, reward, done, final = self._outputs()
-        if self._live is not None:
-            self._show(done)
-        return (
-            observation,
-            reward,
-            done,
-            {'final_observation': final, 'score_reward': self._score_reward},
-        )
+        information = {'final_observation': final, 'score_reward': self._score_reward}
+        if self._observers:
+            self._notify(done, {**information, 'reward': reward})
+        return observation, reward, done, information
 
     def _wait_for_device(self):
         """Waits for every stream of the device, since state copies bypass PyTorch's streams."""

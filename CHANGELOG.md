@@ -9,13 +9,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Every output stays as it was in 0.2.0, bit for bit, on both backends.
+
 ### Added
 
-- Sample matches of eleven and of five a side, which the renderer's library receives on the first
-    start of the server, and `cuju render sample`, which adds them again.
+- Step observers. `BatchEnvironment.add_observer` calls a function after every reset and step of
+    a batch, with the done flags, the information and the rewards of each step, and once when the
+    batch closes, and `remove_observer` and `observers` manage them. A batch without observers pays
+    one check per step, an observer that raises is removed with one warning, and every output stays
+    the same, bit for bit. An observer may remove itself during any call, and one that closes the
+    batch makes the reset or step that called it raise `ClosedError`.
+- `BatchEnvironment.scenario_name`, the names of the scenarios that a batch was created with.
 - `cuju.kaggle.AgentRunner`, `accepts_configuration`, `action_index` and `action_indices`, which
     call a Kaggle agent function as Kaggle does and check its answers, and `cuju.kaggle.observation`
     takes a list of agents for Kaggle's multi-agent form and a shared host copy of the raw arrays.
+
+### Changed
+
+- `import cuju` and the commands of `cuju render` that step no batch start without importing
+    PyTorch, which loads with the first `BatchEnvironment`, so `team list`, `search`, `doctor`,
+    `feed` and the like answer in about a second where they took ten. Every public name of `cuju`
+    stays as it was.
+- cuju imports its renderer only when `cuju render` runs or `CUJU_RENDER` asks for it. Where the
+    renderer is missing, `cuju render`, `python -m cuju.render`, `import cuju.render` and
+    `CUJU_RENDER` give one message naming `pip install 'cuju[render]'`, and the batches of a
+    process with `CUJU_RENDER` run on after one warning.
+- The renderer is its own package, cuju-render, which `pip install 'cuju[render]'` installs
+    beside cuju and which keeps `import cuju.render`, `cuju render` and `CUJU_RENDER` as
+    they were. The wheel of cuju holds no file of the renderer, and its license names the
+    licenses of the engine alone. The renderer's changes are in
+    [its changelog](https://github.com/AndreKoraleski/cuju-render/blob/main/CHANGELOG.md).
+    `import cuju.render` loads the renderer from cuju's folder or from an editable cuju-render,
+    and the folder of another cuju elsewhere on the path stays out of the package.
 
 ## [0.2.0] - 2026-11-07
 
@@ -24,7 +49,6 @@ With default options, every output stays as it was in 0.1.0, bit for bit, on bot
 ### Added
 
 - Renderer MVP medal entrance and match contribution screen with grades, achievements and charts.
-
 - Renderer Help page, resumable games from Home, team zip imports and page addresses.
 - Recording fields for the engine scorer, called offside player and scenario timing, with half
     time in scenarios with a second half and separate episode and recording end cards.
@@ -66,6 +90,8 @@ With default options, every output stays as it was in 0.1.0, bit for bit, on bot
     still run with `python -m`, and `python -m cuju check` stands in where the scripts folder of a
     user installation is missing from the path.
 - The extra `render`, which names the renderer and adds no dependency beyond cuju's own.
+- Sample matches of eleven and of five a side, which the renderer's library receives on the first
+    start of the server, and `cuju render sample`, which adds them again.
 
 ## [0.1.0] - 2026-10-27
 

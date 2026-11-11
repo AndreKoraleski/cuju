@@ -64,8 +64,8 @@ class MultiDeviceBatch:
         ranges: The `(start, end)` environments of each part.
         devices: The device of each part.
         output_device: The device of the outputs.
-        environment_count, agents, players, action_count, squeeze, stacked, auto_reset: As in
-            `BatchEnvironment`.
+        environment_count, agents, players, action_count, squeeze, stacked, auto_reset,
+            scenario_name: As in `BatchEnvironment`.
         left_agents, right_agents, left_players, right_players, agent_mask, difficulty: As in
             `BatchEnvironment`, over every environment.
     """
@@ -159,7 +159,15 @@ class MultiDeviceBatch:
             self.close()
             raise
         first = self.parts[0]
-        for name in ('agents', 'players', 'action_count', 'squeeze', 'stacked', 'auto_reset'):
+        for name in (
+            'agents',
+            'players',
+            'action_count',
+            'squeeze',
+            'stacked',
+            'auto_reset',
+            'scenario_name',
+        ):
             setattr(self, name, getattr(first, name))
         for name in (
             'left_agents',

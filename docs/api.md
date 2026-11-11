@@ -180,6 +180,68 @@ and returns, so a failure on the device usually surfaces at a later call that wa
 `debug=True` the batch waits after every step and reset and raises `DeviceError` at the call that
 caused the failure, which locates a fault at the cost of the waits.
 
+## Step observers
+
+A **step observer** is a callable that a batch calls after each of its resets and steps, so that a
+program can watch a batch, record its matches or count its goals without changing the loop that
+steps it. The renderer's recorder and live sources are step observers.
+
+| Method or attribute | Returns | Meaning |
+| --- | --- | --- |
+| `add_observer(observer)` | the observer | Calls `observer` after every reset and step from now on, and once when the batch closes. |
+| `remove_observer(observer)` | `None` | Stops calling an observer. |
+| `observers` | `tuple` | The observers, in the order of their calls. |
+
+The batch calls `observer(batch, done, information)` with the batch itself and two values that say
+what happened.
+
+| After | `done` | `information` |
+| --- | --- | --- |
+| `step`, `step_wait` | the done flags that the step returns | the information that the step returns, with the rewards that the step returns under `reward` |
+| `reset`, `reset_done` | `None` | `{'reset': mask}`, where `mask` holds `[E]` booleans of the environments that started an episode, or is `None` when every environment did |
+| `close` | `None` | `{'close': True}`, after which the batch drops its observers |
+
+```python
+goals = [0]
+
+
+def count_goals(batch, done, information):
+    if done is not None:
+        goals[0] += int(information['score_reward'].abs().sum())
+
+
+batch.add_observer(count_goals)
+```
+
+The batch calls its observers once the outputs are written, in the order they were added, so each
+observer sees the tensors that the caller receives and may read states with `get_state`. After a
+step, `information` is a dictionary of its own, which adds `reward` to the entries of the
+dictionary that the step returns, so the caller's dictionary stays as `step` documents it. An
+observer is expected to leave the outputs, the information and the states as they are, and a batch
+whose observers do so plays every match as it would without them, bit for bit, with the same random
+numbers. A batch without observers checks one attribute per step and does nothing more for them.
+
+An observer that raises an `Exception` is removed with one warning through the logger `cuju`, and
+the batch goes on with its other observers, so a failure of watching never stops training. An
+observer may remove itself or another observer during its call, the close call included, and one
+that is removed before its turn misses that call. `add_observer` raises `ArgumentError` for a value
+that is not callable or an observer already added, and `ClosedError` on a closed or closing batch.
+`remove_observer` raises `ArgumentError` for an observer that an open batch lacks, and once `close`
+begins it does nothing, since the batch drops every observer.
+
+An observer may also close the batch. The reset or step that called it then raises `ClosedError`,
+since its outputs would view the freed buffers, and the observers after it miss that call. A batch
+dropped without `close` frees its memory once no tensor that it returned remains, and makes no close
+call. An observer that keeps the batch in an attribute forms a cycle with it, which holds the
+batch's memory until Python's garbage collector breaks the cycle, so an observer that needs the
+batch between its calls keeps a `weakref.ref` to it, as the observers of the renderer do. Each call
+hands the observer the batch itself.
+
+Steps and resets that run without Python call no observer. Those are the calls that a CUDA graph
+captured and replays, and the operators `cuju::step` and `cuju::reset_done` inside a function that
+`torch.compile` compiled. The parts of a `MultiDeviceBatch` take observers of their own, each
+called with its part and the done flags of that part, whose environments count from 0.
+
 ## Raw observations
 
 Two methods return the `raw` arrays of GRF as tensors.
@@ -221,6 +283,8 @@ A batch exposes its configuration and layout as attributes.
 | `left_players`, `right_players` | `[E]` `int32` | the players of each team, from the view of a left agent |
 | `difficulty` | `[E, 2]` `float32` | the difficulties that play, the scenario's where nothing overrides them |
 | `squeeze`, `stacked`, `channel_dimensions`, `auto_reset`, `check_actions`, `debug` | | the options of the batch |
+| `scenario_name` | `str` | the scenarios that the batch was created with, by their names without folders or suffixes, joined by commas, such as `5_vs_5_l4_r0` |
+| `observers` | `tuple` | the step observers, described in [Step observers](#step-observers) |
 | `memory_bytes` | `int` | the bytes of memory that the batch has requested so far, device memory on the GPU and host memory on the CPU |
 | `single_observation_space`, `single_action_space` | spaces | one environment, as the spaces of GRF, with a `None` observation space for `raw` |
 | `observation_space`, `action_space` | spaces | the whole batch |
@@ -237,6 +301,8 @@ holds one batch per device and steps them together. Environment `i` plays as env
 `split`. The outputs of `reset` and `step` are gathered on `output_device`, by default the first
 device, and `batch.parts` holds the parts, each with its own outputs. Its `reset` takes `seeds` and
 `reverse`, and `get_state` and `set_state` take the index of an environment over the whole batch.
+Step observers attach to the parts, one part at a time, as in `batch.parts[0].add_observer(f)`,
+and `scenario_name` is that of the parts.
 `close()` closes every part, after which every other call raises `ClosedError`. The layouts are
 described in [Backends](backends.md).
 
@@ -304,18 +370,7 @@ importing `gfootball` registers them in GRF.
 | `cuju.gfootball` | the import paths of GRF, `env` with `create_environment`, `config.Config`, `football_env.FootballEnv`, `football_action_set`, `observation_preprocessing`, `scenario_builder`, `wrappers`, `player_base`, `players`, `script_helpers`, and `replay`, `dump_to_txt` and `scenarios`, so that GRF code runs with its imports switched. Described in [Migrating from GRF](migrating-from-grf.md) |
 | `cuju.check` | `cuju check`, with `[--long] [--device all\|cpu\|cuda] [--case NAME] [--list]` |
 | `cuju.state` | `layout()`, every field of the match in memory by path, `gather(state, fields, frame='rest')`, the bytes of chosen fields of a state, `read(state, fields, frame='rest')`, the same as numpy arrays, `Field` and `FRAMES`. Described in [States](states.md#reading-fields) |
-| `cuju.render` | `Recorder(batch, environment=0, title=None, teams=None, scenario=None)` with `capture(done=None)`, `save()` and `saved`, `watch(batch, environment=0, title=None, teams=None, backlog=False)` and `LiveSource`, `add_team(folder, name=None, format='11v11')`, `play(left, right, scenario='11_vs_11_kaggle', seed=None, title=None, device='cpu', ability=(None, None))`, `serve(port=8780, open_browser=False)` and `home()`, and the command `cuju render [serve\|team\|play\|sample]`, also `python -m cuju.render`. Described in [Rendering](rendering.md) |
-
-`Recorder.capture(done)` saves an episode when it ends, and `Recorder.save()` saves the frames
-captured so far. Both return a path or `None`. `LiveSource.close()` withdraws a source, and
-`watch` replaces any source already attached to that batch. `home()` returns the renderer folder.
-
-`play` runs a requested match and returns its recording path. Each team's saved control settings
-choose the count, dynamic or fixed assignment, indices or roles, goalkeeper and action set.
-The scenario may be bundled or one of the six renderer GRF MARL scenarios. Each entry of `ability`
-sets GRF's team difficulty from 0 to 1, with `None` keeping that side's scenario value.
-The browser also provides Play a game with keyboard and controller input, described in
-[Rendering](rendering.md#playing-a-game).
+| `cuju.render` | the browser renderer, which the package cuju-render installs with `pip install 'cuju[render]'`, with `show`, `Recorder`, `watch`, `play`, `serve` and the command `cuju render`. Described in [Rendering](rendering.md) and in the [reference of cuju-render](https://github.com/AndreKoraleski/cuju-render/blob/main/docs/reference.md) |
 
 `cuju.kaggle.AgentRunner` calls a Kaggle agent function as Kaggle does, with the configuration
 second when `accepts_configuration(function)` finds two positional parameters, and its
@@ -325,7 +380,8 @@ an `Action` member, and several answer with one action each. `action_index(answe
 `action_indices(answer, count, players)` check an answer alone and raise `ValueError`, `TypeError`
 or `IndexError` for one outside the set. With a list of agents, `observation` builds Kaggle's
 multi-agent form, and `raw` takes one host copy of `batch.raw()` that several observations share.
-Together they serve a program that plays matches step by step.
+Together they serve a program that plays matches step by step, as the renderer does for its
+requested matches.
 
 ```python
 from cuju import kaggle
@@ -346,6 +402,27 @@ tool. `cuju render` runs the renderer, `cuju check` the self-check, and `cuju re
 module whose `main(arguments)` parses the rest of the command line, so a later tool joins the
 command as one more entry.
 
+The renderer is optional, and cuju imports it only when `cuju render` runs or `CUJU_RENDER` asks
+for it, so `import cuju` and the steps of a batch leave it unloaded and read no entry points. Where
+the renderer is missing, `cuju render`, `python -m cuju.render` and `import cuju.render` each end
+with one message naming `pip install 'cuju[render]'`, `cuju render` with exit status 1, and
+`CUJU_RENDER` warns once per process through the logger `cuju` while every batch runs on.
+
+The message comes from a finder that `import cuju` adds last to `sys.meta_path`, so where the
+renderer is missing `importlib.util.find_spec('cuju.render')` raises the same `ModuleNotFoundError`
+as the import. A program that runs with or without the renderer therefore imports it in a `try`
+block, and the name of the error tells the missing renderer apart from a module that the renderer
+itself lacks.
+
+```python
+try:
+    import cuju.render as render
+except ModuleNotFoundError as error:
+    if error.name != 'cuju.render':
+        raise
+    render = None
+```
+
 ```sh
 cuju help
 cuju render serve --open
@@ -364,9 +441,11 @@ control logging, caching, NUMA placement and the renderer. All of them leave the
 | `CUJU_LOG` | `1` logs one line per batch created, through the logger `cuju` |
 | `CUJU_BUNDLE_CACHE` | `1` or a directory, to cache the bundles built from scenario files |
 | `CUJU_NUMA_NODES` | the NUMA node of each processor, for `numa=True` |
-| `CUJU_RENDER` | `on`, or the index of an environment, gives every batch a live source for the renderer, and an empty value, `off`, `false` or `no` none, with an index past a batch's count taken as 0 |
+| `CUJU_RENDER` | `on`, or the index of an environment, gives every batch a live source for the renderer, and an empty value, `off`, `false` or `no` none, with an index past a batch's count taken as 0. A process whose renderer is missing warns once and runs every batch on |
 | `CUJU_RENDER_BACKLOG` | any value but an empty one, `0`, `off` or `no` makes every live source read every step, so that a viewer starts with 10 seconds of history |
 | `CUJU_RENDER_HOME` | the folder of the renderer's recordings, teams and live sources, `~/.cuju/render` by default |
+| `CUJU_CHROME` | the Chrome, Edge or Chromium program that draws and encodes the videos of `cuju render video` and of the server's video export |
+| `CUJU_FFMPEG` | an ffmpeg program, optional, which `cuju render video` uses only for an MP4 that the browser cannot encode |
 
 ## C API
 
