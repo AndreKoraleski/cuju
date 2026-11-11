@@ -7,6 +7,10 @@ on:
     push:
     pull_request:
 
+# The jobs only read the repository, so the token of every job reads alone.
+permissions:
+    contents: read
+
 jobs:
     cpu:
         runs-on: ubuntu-24.04

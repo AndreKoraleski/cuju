@@ -131,6 +131,20 @@ def test_wheel_holds_only_checked_architectures():
     assert wheel.split(';') == [f'{capability}-real' for capability in checked.group(1).split()]
 
 
+def test_publishing_needs_a_tag_that_names_the_version():
+    # The publish job runs only for a dispatch on a tag `v*`, and checks that the tag names
+    # `__version__` before anything reaches PyPI.
+    with open(source_file('.github', 'workflows', 'release.yml'), encoding='utf-8') as handle:
+        workflow = handle.read()
+    publish = workflow[workflow.index('\n    publish:') :]
+    condition = publish[: publish.index('runs-on:')]
+    assert 'inputs.publish' in condition
+    assert "startsWith(github.ref, 'refs/tags/v')" in condition
+    check = publish.index('"$GITHUB_REF_NAME" != "v$version"')
+    assert publish.index("python/cuju/_version.py')['__version__']") < check
+    assert check < publish.index('gh-action-pypi-publish')
+
+
 def test_apptainer_takes_the_image_of_this_version():
     with open(source_file('apptainer.def'), encoding='utf-8') as handle:
         image = re.search(r'(?m)^ +IMAGE=(\S+)$', handle.read()).group(1)

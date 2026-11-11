@@ -4,7 +4,8 @@
 name: release
 
 # A tag or a dispatch builds and checks the sdist and every wheel. Only a dispatch with `publish`
-# set publishes them, through PyPI's trusted publishing and the `pypi` environment's approval.
+# set, run on a tag `v*` that names `__version__`, publishes them, through PyPI's trusted publishing
+# and the `pypi` environment's approval.
 on:
     push:
         tags: ['v*']
@@ -297,13 +298,24 @@ jobs:
     # Only the sdist and the wheels of `cuju` are published; the SBOMs stay workflow artifacts.
     publish:
         needs: [sdist, wheel, test, sbom]
-        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        if: >-
+            github.event_name == 'workflow_dispatch' && inputs.publish
+            && startsWith(github.ref, 'refs/tags/v')
         runs-on: ubuntu-24.04
         # The environment requires a maintainer's approval before anything is published.
         environment: pypi
         permissions:
+            contents: read
             id-token: write
         steps:
+            - uses: actions/checkout@v7
+            - name: Check that the tag names the version of the package
+              run: |
+                  version=$(python3 -c "import runpy; print(runpy.run_path('python/cuju/_version.py')['__version__'])")
+                  if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+                      echo "the tag $GITHUB_REF_NAME names another version than __version__ $version"
+                      exit 1
+                  fi
             - uses: actions/download-artifact@v8
               with:
                   path: dist
